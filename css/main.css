@@ -166,6 +166,10 @@ textarea {
     color: #777
 }
 
+.sudoku-cell-invalid {
+    color: red
+}
+
 .sudoku-cell-content:focus {
     outline: none;
 }
