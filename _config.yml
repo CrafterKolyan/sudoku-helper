@@ -1,0 +1,6 @@
+title: Sudoku helper
+
+exclude:
+  - .gitignore
+  - .vscode
+  - README.md
