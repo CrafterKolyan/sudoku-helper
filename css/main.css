@@ -124,6 +124,10 @@ textarea {
     width: 24px;
 }
 
+.sudoku-row:nth-last-child(2) > .sudoku-cell {
+    border-bottom: 1px solid black;
+}
+
 .sudoku-row > .sudoku-cell:first-child {
     width: 27px;
     border-left: 3px solid black;
@@ -143,7 +147,6 @@ textarea {
 .sudoku-h-divider {
     background-color: black;
     height: 2px;
-    width: 226px;
 }
 
 .sudoku-cell-content {
