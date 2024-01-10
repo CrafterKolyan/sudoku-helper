@@ -158,6 +158,14 @@ textarea {
     text-align: center;
 }
 
+.sudoku-cell-input {
+    color: #000
+}
+
+.sudoku-cell-computed {
+    color: #777
+}
+
 .sudoku-cell-content:focus {
     outline: none;
 }
