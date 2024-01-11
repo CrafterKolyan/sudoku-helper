@@ -34,6 +34,34 @@ class ArrayUtils {
     }
 }
 
+class Matrix {
+    #matrix
+    
+    constructor(rows, cols, value) {
+        this.#matrix = Array(rows)
+            .fill()
+            .map(() => Array(cols).fill(value))
+    }
+
+    get matrix() {
+        return this.#matrix
+    }
+
+
+    clone() {
+        if (this.#matrix.length === 0) {
+            return new Matrix(0, 0, 0)
+        }
+        const clone = new Matrix(this.#matrix.length, this.#matrix[0].length, 0)
+        for (let i = 0; i < this.#matrix.length; ++i) {
+            for (let j = 0; j < this.#matrix[0].length; ++j) {
+                clone.matrix[i][j] = this.#matrix[i][j]
+            }
+        }
+        return clone
+    }
+}
+
 class Ids {
     static cell(row, col) {
         return "cell-" + row.toString() + "-" + col.toString()
@@ -43,24 +71,22 @@ class Ids {
 class Sudoku {
     static sudokuN = 3
     static sudokuSize = this.sudokuN * this.sudokuN
-    static sudokuInput = Array(this.sudokuSize)
-        .fill(0)
-        .map(() => Array(this.sudokuSize).fill(0))
+    static sudokuInput = new Matrix(this.sudokuSize, this.sudokuSize, 0)
 
     static load(sudoku) {
         for (let i = 0; i < this.sudokuSize; ++i) {
             for (let j = 0; j < this.sudokuSize; ++j) {
-                this.setCell(i, j, sudoku[i][j])
+                this.setCellNoRecompute(i, j, sudoku[i][j])
             }
         }
         this.validateSudoku()
         this.solveSudokuAndFillCells()
     }
 
-    static column(col) {
+    static column(sudoku, col) {
         let column = []
         for (let i = 0; i < this.sudokuSize; ++i) {
-            column.push(this.sudokuInput[i][col])
+            column.push(sudoku.matrix[i][col])
         }
         return column
     }
@@ -69,13 +95,13 @@ class Sudoku {
         return this.sudokuN * Math.floor(row / this.sudokuN) + Math.floor(col / this.sudokuN)
     }
 
-    static block(blockNumber) {
+    static block(sudoku, blockNumber) {
         let block = []
         let startI = Math.floor(blockNumber / this.sudokuN) * this.sudokuN
         let startJ = (blockNumber % this.sudokuN) * this.sudokuN
         for (let i = startI; i < startI + this.sudokuN; ++i) {
             for (let j = startJ; j < startJ + this.sudokuN; ++j) {
-                block.push(this.sudokuInput[i][j])
+                block.push(sudoku.matrix[i][j])
             }
         }
         return block
@@ -93,7 +119,7 @@ class Sudoku {
         return indices
     }
 
-    static setCell(row, col, value) {
+    static setCellNoRecompute(row, col, value) {
         let input = document.getElementById(Ids.cell(row, col))
         if (value !== 0) {
             input.value = value.toString()
@@ -104,20 +130,33 @@ class Sudoku {
             input.classList.add("sudoku-cell-computed")
             input.classList.remove("sudoku-cell-input")
         }
-        this.sudokuInput[row][col] = value
+        this.sudokuInput.matrix[row][col] = value
+    }
+
+    static setCell(row, col, value) {
+        this.setCellNoRecompute(row, col, value)
         this.validateSudoku()
         this.solveSudokuAndFillCells()
     }
 
+    static setCellComputed(row, col, value) {
+        let input = document.getElementById(Ids.cell(row, col))
+        if (value !== 0) {
+            input.value = value.toString()
+        } else {
+            input.value = ""
+        }
+    }
+
     static validateRow(row) {
-        const argDuplicates = ArrayUtils.argDuplicates(this.sudokuInput[row])
+        const argDuplicates = ArrayUtils.argDuplicates(this.sudokuInput.matrix[row])
         for (let i = 0; i < argDuplicates.length; ++i) {
             document.getElementById(Ids.cell(row, argDuplicates[i])).classList.add("sudoku-cell-invalid")
         }
     }
 
     static validateColumn(col) {
-        const column = this.column(col)
+        const column = this.column(this.sudokuInput, col)
         const argDuplicates = ArrayUtils.argDuplicates(column)
         for (let i = 0; i < argDuplicates.length; ++i) {
             document.getElementById(Ids.cell(argDuplicates[i], col)).classList.add("sudoku-cell-invalid")
@@ -125,7 +164,7 @@ class Sudoku {
     }
 
     static validateBlock(blockNumber) {
-        const block = this.block(blockNumber)
+        const block = this.block(this.sudokuInput, blockNumber)
         const blockIndices = this.blockIndices(blockNumber)
         const argDuplicates = ArrayUtils.argDuplicates(block)
         for (let i = 0; i < argDuplicates.length; ++i) {
@@ -168,8 +207,44 @@ class Sudoku {
         this.validateBlocks()
     }
 
+    static solveSudoku() {
+        let sudoku = this.sudokuInput.clone()
+        let changed = true
+        while (changed) {
+            changed = false
+            for (let i = 0; i < this.sudokuSize; ++i) {
+                for (let j = 0; j < this.sudokuSize; ++j) {
+                    if (sudoku.matrix[i][j] === 0) {
+                        let possibleValuesForCell = []
+                        for (let k = 1; k <= this.sudokuSize; ++k) {
+                            if (
+                                !sudoku.matrix[i].includes(k) &&
+                                !this.column(sudoku, j).includes(k) &&
+                                !this.block(sudoku, this.blockNumber(i, j)).includes(k)
+                            ) {
+                                possibleValuesForCell.push(k)
+                            }
+                        }
+                        if (possibleValuesForCell.length === 1) {
+                            sudoku.matrix[i][j] = possibleValuesForCell[0]
+                            changed = true
+                        }
+                    }
+                }
+            }
+        }
+        return sudoku
+    }
+
     static solveSudokuAndFillCells() {
-        let sudoku = this.sudokuInput
+        let sudoku = this.solveSudoku()
+        for (let i = 0; i < this.sudokuSize; ++i) {
+            for (let j = 0; j < this.sudokuSize; ++j) {
+                if (this.sudokuInput.matrix[i][j] === 0) {
+                    this.setCellComputed(i, j, sudoku.matrix[i][j])
+                }
+            }
+        }
     }
 }
 
