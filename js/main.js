@@ -65,6 +65,34 @@ class Sudoku {
         return column
     }
 
+    static blockNumber(row, col) {
+        return this.sudokuN * Math.floor(row / this.sudokuN) + Math.floor(col / this.sudokuN)
+    }
+
+    static block(blockNumber) {
+        let block = []
+        let startI = Math.floor(blockNumber / this.sudokuN) * this.sudokuN
+        let startJ = (blockNumber % this.sudokuN) * this.sudokuN
+        for (let i = startI; i < startI + this.sudokuN; ++i) {
+            for (let j = startJ; j < startJ + this.sudokuN; ++j) {
+                block.push(this.sudokuInput[i][j])
+            }
+        }
+        return block
+    }
+
+    static blockIndices(blockNumber) {
+        let indices = []
+        let startI = Math.floor(blockNumber / this.sudokuN) * this.sudokuN
+        let startJ = blockNumber % this.sudokuN
+        for (let i = startI; i < startI + this.sudokuN; ++i) {
+            for (let j = startJ; j < startJ + this.sudokuN; ++j) {
+                indices.push([i, j])
+            }
+        }
+        return indices
+    }
+
     static setCell(row, col, value) {
         let input = document.getElementById(Ids.cell(row, col))
         if (value !== 0) {
@@ -96,6 +124,17 @@ class Sudoku {
         }
     }
 
+    static validateBlock(blockNumber) {
+        const block = this.block(blockNumber)
+        const blockIndices = this.blockIndices(blockNumber)
+        const argDuplicates = ArrayUtils.argDuplicates(block)
+        for (let i = 0; i < argDuplicates.length; ++i) {
+            let row = blockIndices[argDuplicates[i]][0]
+            let col = blockIndices[argDuplicates[i]][1]
+            document.getElementById(Ids.cell(row, col)).classList.add("sudoku-cell-invalid")
+        }
+    }
+
     static clearInvalid() {
         for (let i = 0; i < this.sudokuSize; ++i) {
             for (let j = 0; j < this.sudokuSize; ++j) {
@@ -116,10 +155,17 @@ class Sudoku {
         }
     }
 
+    static validateBlocks() {
+        for (let i = 0; i < this.sudokuSize; ++i) {
+            this.validateBlock(i)
+        }
+    }
+
     static validateSudoku() {
         this.clearInvalid()
         this.validateRows()
         this.validateColumns()
+        this.validateBlocks()
     }
 
     static solveSudokuAndFillCells() {
