@@ -176,6 +176,9 @@ class Elements {
                 
             }
         })
+        input.addEventListener("paste", (event) => {
+            event.preventDefault()
+        })
         return input
     }
 
