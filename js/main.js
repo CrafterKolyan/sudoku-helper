@@ -110,7 +110,7 @@ class Sudoku {
     static blockIndices(blockNumber) {
         let indices = []
         let startI = Math.floor(blockNumber / this.sudokuN) * this.sudokuN
-        let startJ = blockNumber % this.sudokuN
+        let startJ = blockNumber % this.sudokuN * this.sudokuN
         for (let i = startI; i < startI + this.sudokuN; ++i) {
             for (let j = startJ; j < startJ + this.sudokuN; ++j) {
                 indices.push([i, j])
@@ -209,6 +209,7 @@ class Sudoku {
 
     static solveSudoku() {
         let sudoku = this.sudokuInput.clone()
+        let possibleValuesForCells = new Matrix(this.sudokuSize, this.sudokuSize, [])
         let changed = true
         while (changed) {
             changed = false
@@ -229,6 +230,61 @@ class Sudoku {
                             sudoku.matrix[i][j] = possibleValuesForCell[0]
                             changed = true
                         }
+                        possibleValuesForCells.matrix[i][j] = possibleValuesForCell
+                    } else {
+                        possibleValuesForCells.matrix[i][j] = []
+                    }
+                }
+            }
+            if (changed) {
+                continue
+            }
+            for (let blockNumber = 0; blockNumber < this.sudokuSize; ++blockNumber) {
+                let blockIndices = this.blockIndices(blockNumber)
+                for (let k = 1; k <= this.sudokuSize; ++k) {
+                    let possibleIndices = []
+                    for (let i = 0; i < blockIndices.length; ++i) {
+                        let row = blockIndices[i][0]
+                        let col = blockIndices[i][1]
+                        if (possibleValuesForCells.matrix[row][col].includes(k)) {
+                            possibleIndices.push([row, col])
+                        }
+                    }
+                    if (possibleIndices.length === 1) {
+                        let row = possibleIndices[0][0]
+                        let col = possibleIndices[0][1]
+                        sudoku.matrix[row][col] = k
+                        changed = true
+                    }
+                }
+            }
+            for (let i = 0; i < this.sudokuSize; ++i) {
+                for (let k = 1; k <= this.sudokuSize; ++k) {
+                    let possibleIndices = []
+                    for (let j = 0; j < this.sudokuSize; ++j) {
+                        if (possibleValuesForCells.matrix[i][j].includes(k)) {
+                            possibleIndices.push(j)
+                        }
+                    }
+                    if (possibleIndices.length === 1) {
+                        let col = possibleIndices[0]
+                        sudoku.matrix[i][col] = k
+                        changed = true
+                    }
+                }
+            }
+            for (let j = 0; j < this.sudokuSize; ++j) {
+                for (let k = 1; k <= this.sudokuSize; ++k) {
+                    let possibleIndices = []
+                    for (let i = 0; i < this.sudokuSize; ++i) {
+                        if (possibleValuesForCells.matrix[i][j].includes(k)) {
+                            possibleIndices.push(i)
+                        }
+                    }
+                    if (possibleIndices.length === 1) {
+                        let row = possibleIndices[0]
+                        sudoku.matrix[row][j] = k
+                        changed = true
                     }
                 }
             }
