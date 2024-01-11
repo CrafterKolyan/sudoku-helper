@@ -47,6 +47,16 @@ class Sudoku {
         .fill(0)
         .map(() => Array(this.sudokuSize).fill(0))
 
+    static load(sudoku) {
+        for (let i = 0; i < this.sudokuSize; ++i) {
+            for (let j = 0; j < this.sudokuSize; ++j) {
+                this.setCell(i, j, sudoku[i][j])
+            }
+        }
+        this.validateSudoku()
+        this.solveSudokuAndFillCells()
+    }
+
     static column(col) {
         let column = []
         for (let i = 0; i < this.sudokuSize; ++i) {
@@ -56,6 +66,16 @@ class Sudoku {
     }
 
     static setCell(row, col, value) {
+        let input = document.getElementById(Ids.cell(row, col))
+        if (value !== 0) {
+            input.value = value.toString()
+            input.classList.add("sudoku-cell-input")
+            input.classList.remove("sudoku-cell-computed")
+        } else {
+            input.value = ""
+            input.classList.add("sudoku-cell-computed")
+            input.classList.remove("sudoku-cell-input")
+        }
         this.sudokuInput[row][col] = value
         this.validateSudoku()
         this.solveSudokuAndFillCells()
@@ -118,20 +138,42 @@ class Elements {
             event.preventDefault()
             const key = event.key
             if (StringUtils.isNumeric(key) && key !== "0") {
-                input.value = key
-                input.classList.add("sudoku-cell-input")
-                input.classList.remove("sudoku-cell-computed")
                 Sudoku.setCell(row, col, parseInt(key))
             }
         })
         input.addEventListener("keydown", (event) => {
             const key = event.key
-            if (key === "Backspace" || key === "Delete") {
-                event.preventDefault()
-                input.value = ""
-                input.classList.add("sudoku-cell-computed")
-                input.classList.remove("sudoku-cell-input")
-                Sudoku.setCell(row, col, 0)
+            switch (key) {
+                case "ArrowUp":
+                    event.preventDefault()
+                    if (row > 0) {
+                        document.getElementById(Ids.cell(row - 1, col)).focus()
+                    }
+                    break
+                case "ArrowDown":
+                    event.preventDefault()
+                    if (row < Sudoku.sudokuSize - 1) {
+                        document.getElementById(Ids.cell(row + 1, col)).focus()
+                    }
+                    break
+                case "ArrowLeft":
+                    event.preventDefault()
+                    if (col > 0) {
+                        document.getElementById(Ids.cell(row, col - 1)).focus()
+                    }
+                    break
+                case "ArrowRight":
+                    event.preventDefault()
+                    if (col < Sudoku.sudokuSize - 1) {
+                        document.getElementById(Ids.cell(row, col + 1)).focus()
+                    }
+                    break
+                case "Backspace":
+                case "Delete":
+                    event.preventDefault()
+                    Sudoku.setCell(row, col, 0)
+                    break
+                
             }
         })
         return input
@@ -209,6 +251,17 @@ function addSudokuTable() {
 
 function initialize() {
     addSudokuTable()
+    Sudoku.load([
+        [6, 1, 0, 0, 0, 0, 0, 5, 4],
+        [3, 0, 8, 0, 0, 4, 0, 0, 7],
+        [0, 0, 0, 0, 2, 0, 0, 1, 0],
+        [0, 8, 0, 0, 0, 0, 0, 0, 3],
+        [5, 0, 0, 2, 7, 0, 0, 0, 0],
+        [0, 0, 0, 8, 0, 1, 0, 7, 0],
+        [0, 0, 0, 0, 5, 0, 6, 3, 0],
+        [9, 5, 0, 1, 0, 6, 7, 4, 0],
+        [1, 7, 0, 4, 3, 2, 8, 9, 0]
+    ])
 }
 
 window.addEventListener("load", initialize)
