@@ -356,6 +356,17 @@ class Elements {
         input.addEventListener("paste", (event) => {
             event.preventDefault()
         })
+        input.addEventListener("input", (event) => {
+            const value = event.target.value
+            if (value === "") {
+                Sudoku.setCell(row, col, 0)
+            } else if(value.length === 1 && StringUtils.isNumeric(value) && value !== "0") {
+                Sudoku.setCell(row, col, parseInt(value))
+            } else {
+                event.target.value = ""
+                Sudoku.setCell(row, col, 0)
+            }
+        })
         return input
     }
 
