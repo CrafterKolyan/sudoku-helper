@@ -315,12 +315,17 @@ class Elements {
         } else {
             hDividerWidth = sudokuCellSizePx * Sudoku.sudokuSize + 2 * (Sudoku.sudokuN - 1) + 6
         }
+        const fontSize = Math.floor(sudokuCellSizePx * 0.5)
         return `
         .sudoku-cell {
             border-top: 1px solid black;
             border-right: 1px solid black;
             height: ${sudokuCellSizePx}px;
             width: ${sudokuCellSizePx}px;
+        }
+
+        .sudoku-cell > input {
+            font-size: ${fontSize}px;
         }
 
         .sudoku-row > .sudoku-cell:first-child {
