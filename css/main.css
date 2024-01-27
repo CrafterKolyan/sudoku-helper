@@ -184,4 +184,5 @@ textarea {
 
 .sudoku-cell-content[type=number] {
     -moz-appearance:textfield; /* Firefox */
+    appearance: textfield; /* Safari and Chrome */
 }
