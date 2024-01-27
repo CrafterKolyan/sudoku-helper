@@ -117,36 +117,8 @@ textarea {
     display: flex;
 }
 
-.sudoku-cell {
-    border-top: 1px solid black;
-    border-right: 1px solid black;
-    height: 24px;
-    width: 24px;
-}
-
 .sudoku-row:nth-last-child(2) > .sudoku-cell {
     border-bottom: 1px solid black;
-}
-
-.sudoku-row > .sudoku-cell:first-child {
-    width: 27px;
-    border-left: 3px solid black;
-}
-
-.sudoku-row > .sudoku-cell:last-child {
-    width: 27px;
-    border-right: 3px solid black;
-}
-
-.sudoku-v-divider {
-    background-color: black;
-    height: 24px;
-    width: 2px
-}
-
-.sudoku-h-divider {
-    background-color: black;
-    height: 2px;
 }
 
 .sudoku-cell-content {

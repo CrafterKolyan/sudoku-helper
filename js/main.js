@@ -305,6 +305,62 @@ class Sudoku {
 }
 
 class Elements {
+    static _sudokuCellStyle
+    static _sudokuCellSizePx = 60
+
+    static _sudokuStyleContent(sudokuCellSizePx) {
+        let hDividerWidth
+        if (Sudoku.sudokuSize === 1) {
+            hDividerWidth = sudokuCellSizePx + 3
+        } else {
+            hDividerWidth = sudokuCellSizePx * Sudoku.sudokuSize + 2 * (Sudoku.sudokuN - 1) + 6
+        }
+        return `
+        .sudoku-cell {
+            border-top: 1px solid black;
+            border-right: 1px solid black;
+            height: ${sudokuCellSizePx}px;
+            width: ${sudokuCellSizePx}px;
+        }
+
+        .sudoku-row > .sudoku-cell:first-child {
+            width: ${sudokuCellSizePx + 3}px;
+            border-left: 3px solid black;
+        }
+
+        .sudoku-row > .sudoku-cell:last-child {
+            width: ${sudokuCellSizePx + 3}px;
+            border-right: 3px solid black;
+        }
+        
+        .sudoku-v-divider {
+            background-color: black;
+            height: ${sudokuCellSizePx}px;
+            width: 2px
+        }
+        
+        .sudoku-h-divider {
+            background-color: black;
+            height: 2px;
+            width: ${hDividerWidth}px;
+        }`
+    }
+
+    static sudokuStyle() {
+        if (this._sudokuCellStyle === undefined) {
+            const style = document.createElement("style")
+            style.innerHTML = this._sudokuStyleContent(this._sudokuCellSizePx)
+            this._sudokuCellStyle = style
+        }
+        return this._sudokuCellStyle
+    }
+
+    static sudokuCellSizeChange(sudokuCellSizePx) {
+        this._sudokuCellSizePx = sudokuCellSizePx
+        this._sudokuCellStyle.innerHTML = this._sudokuStyleContent(sudokuCellSizePx)
+        console.log(this._sudokuCellStyle)
+    }
+
     static sudokuTableCellContent(row, col) {
         const input = document.createElement("input")
         input.id = Ids.cell(row, col)
@@ -386,13 +442,6 @@ class Elements {
     static sudokuTableHorizontalDividerCell() {
         const td = document.createElement("td")
         td.className = "sudoku-h-divider"
-        let width
-        if (Sudoku.sudokuSize === 1) {
-            width = 27
-        } else {
-            width = 24 * Sudoku.sudokuSize + 2 * (Sudoku.sudokuN - 1) + 6
-        }
-        td.style.width = width.toString() + "px"
         return td
     }
 
@@ -437,7 +486,17 @@ class Elements {
 function addSudokuTable() {
     const main = document.getElementById("main")
     const sudokuTable = Elements.sudokuTable()
+    const sudokuCellStyle = Elements.sudokuStyle()
+    main.appendChild(sudokuCellStyle)
     main.appendChild(sudokuTable)
+
+    function recalculateSudokuCellSize() {
+        const sudokuCellSize = Math.max(Math.floor(Math.min(window.innerWidth, window.innerHeight) / Sudoku.sudokuSize / Math.sqrt(2)), 24)
+        Elements.sudokuCellSizeChange(sudokuCellSize)
+    }
+
+    window.addEventListener("resize", recalculateSudokuCellSize)
+    recalculateSudokuCellSize()
 }
 
 function initialize() {
