@@ -36,7 +36,7 @@ class ArrayUtils {
 
 class Matrix {
     #matrix
-    
+
     constructor(rows, cols, value) {
         this.#matrix = Array(rows)
             .fill()
@@ -46,7 +46,6 @@ class Matrix {
     get matrix() {
         return this.#matrix
     }
-
 
     clone() {
         if (this.#matrix.length === 0) {
@@ -110,7 +109,7 @@ class Sudoku {
     static blockIndices(blockNumber) {
         let indices = []
         let startI = Math.floor(blockNumber / this.sudokuN) * this.sudokuN
-        let startJ = blockNumber % this.sudokuN * this.sudokuN
+        let startJ = (blockNumber % this.sudokuN) * this.sudokuN
         for (let i = startI; i < startI + this.sudokuN; ++i) {
             for (let j = startJ; j < startJ + this.sudokuN; ++j) {
                 indices.push([i, j])
@@ -120,15 +119,15 @@ class Sudoku {
     }
 
     static setCellNoRecompute(row, col, value) {
-        let input = document.getElementById(Ids.cell(row, col))
+        let div = document.getElementById(Ids.cell(row, col))
         if (value !== 0) {
-            input.value = value.toString()
-            input.classList.add("sudoku-cell-input")
-            input.classList.remove("sudoku-cell-computed")
+            div.innerText = value.toString()
+            div.classList.add("sudoku-cell-input")
+            div.classList.remove("sudoku-cell-computed")
         } else {
-            input.value = ""
-            input.classList.add("sudoku-cell-computed")
-            input.classList.remove("sudoku-cell-input")
+            div.innerText = ""
+            div.classList.add("sudoku-cell-computed")
+            div.classList.remove("sudoku-cell-input")
         }
         this.sudokuInput.matrix[row][col] = value
     }
@@ -140,11 +139,11 @@ class Sudoku {
     }
 
     static setCellComputed(row, col, value) {
-        let input = document.getElementById(Ids.cell(row, col))
+        let div = document.getElementById(Ids.cell(row, col))
         if (value !== 0) {
-            input.value = value.toString()
+            div.innerText = value.toString()
         } else {
-            input.value = ""
+            div.innerText = ""
         }
     }
 
@@ -307,6 +306,9 @@ class Sudoku {
 class Elements {
     static _sudokuCellStyle
     static _sudokuCellSizePx = 60
+    static _sudokuHiddenInput
+    static _activeCellRow = undefined
+    static _activeCellCol = undefined
 
     static _sudokuStyleContent(sudokuCellSizePx) {
         let hDividerWidth
@@ -322,9 +324,6 @@ class Elements {
             border-right: 1px solid black;
             height: ${sudokuCellSizePx}px;
             width: ${sudokuCellSizePx}px;
-        }
-
-        .sudoku-cell > input {
             font-size: ${fontSize}px;
         }
 
@@ -363,72 +362,108 @@ class Elements {
     static sudokuCellSizeChange(sudokuCellSizePx) {
         this._sudokuCellSizePx = sudokuCellSizePx
         this._sudokuCellStyle.innerHTML = this._sudokuStyleContent(sudokuCellSizePx)
-        console.log(this._sudokuCellStyle)
+    }
+
+    static _setActiveCell(row, col) {
+        if (this._activeCellRow !== undefined && this._activeCellCol !== undefined) {
+            document.getElementById(Ids.cell(this._activeCellRow, this._activeCellCol)).classList.remove("sudoku-cell-selected")
+        }
+        this._activeCellRow = row
+        this._activeCellCol = col
+        if (row !== undefined && col !== undefined) {
+            document.getElementById(Ids.cell(row, col)).classList.add("sudoku-cell-selected")
+            this._sudokuHiddenInput.value = "0"
+            this._sudokuHiddenInput.select()
+            this._sudokuHiddenInput.focus()
+        }
+    }
+
+    static sudokuHiddenInput() {
+        if (this._sudokuHiddenInput === undefined) {
+            const input = document.createElement("input")
+            input.id = "sudoku-hidden-input"
+            input.className = "sudoku-hidden-input"
+            input.type = "number"
+            input.addEventListener("input", () => {
+                if (input.value === "") {
+                    Sudoku.setCell(this._activeCellRow, this._activeCellCol, 0)
+                } else if (StringUtils.isNumeric(input.value)) {
+                    if (parseInt(input.value) > 0 && parseInt(input.value) <= Sudoku.sudokuSize) {
+                        Sudoku.setCell(this._activeCellRow, this._activeCellCol, parseInt(input.value))
+                    }
+                }
+                input.value = "0"
+                input.select()
+            })
+            input.addEventListener("keydown", (event) => {
+                switch (event.key) {
+                    case "Escape":
+                    case "Backspace":
+                    case "Delete":
+                    case "ArrowUp":
+                    case "ArrowDown":
+                    case "ArrowLeft":
+                    case "ArrowRight":
+                    case "0":
+                    case "1":
+                    case "2":
+                    case "3":
+                    case "4":
+                    case "5":
+                    case "6":
+                    case "7":
+                    case "8":
+                    case "9":
+                        event.preventDefault()
+                }
+                switch (event.key) {
+                    case "Escape":
+                        this._setActiveCell(undefined, undefined)
+                    case "Backspace":
+                        Sudoku.setCell(this._activeCellRow, this._activeCellCol, 0)
+                        break
+                    case "Delete":
+                        Sudoku.setCell(this._activeCellRow, this._activeCellCol, 0)
+                        break
+                    case "ArrowUp":
+                        if (this._activeCellRow > 0) {
+                            this._setActiveCell(this._activeCellRow - 1, this._activeCellCol)
+                        }
+                        break
+                    case "ArrowDown":
+                        if (this._activeCellRow < Sudoku.sudokuSize - 1) {
+                            this._setActiveCell(this._activeCellRow + 1, this._activeCellCol)
+                        }
+                        break
+                    case "ArrowLeft":
+                        if (this._activeCellCol > 0) {
+                            this._setActiveCell(this._activeCellRow, this._activeCellCol - 1)
+                        }
+                        break
+                    case "ArrowRight":
+                        if (this._activeCellCol < Sudoku.sudokuSize - 1) {
+                            this._setActiveCell(this._activeCellRow, this._activeCellCol + 1)
+                        }
+                        break
+                }
+                if (event.key >= "1" && event.key <= "9") {
+                    Sudoku.setCell(this._activeCellRow, this._activeCellCol, parseInt(event.key))
+                }
+            })
+            this._sudokuHiddenInput = input
+        }
+
+        return this._sudokuHiddenInput
     }
 
     static sudokuTableCellContent(row, col) {
-        const input = document.createElement("input")
-        input.id = Ids.cell(row, col)
-        input.type = "number"
-        input.classList.add("sudoku-cell-content")
-        input.classList.add("sudoku-cell-computed")
-        input.addEventListener("keypress", (event) => {
-            event.preventDefault()
-            const key = event.key
-            if (StringUtils.isNumeric(key) && key !== "0") {
-                Sudoku.setCell(row, col, parseInt(key))
-            }
+        const div = document.createElement("div")
+        div.className = "sudoku-cell-content sudoku-cell-computed"
+        div.id = Ids.cell(row, col)
+        div.addEventListener("click", () => {
+            this._setActiveCell(row, col)
         })
-        input.addEventListener("keydown", (event) => {
-            const key = event.key
-            switch (key) {
-                case "ArrowUp":
-                    event.preventDefault()
-                    if (row > 0) {
-                        document.getElementById(Ids.cell(row - 1, col)).focus()
-                    }
-                    break
-                case "ArrowDown":
-                    event.preventDefault()
-                    if (row < Sudoku.sudokuSize - 1) {
-                        document.getElementById(Ids.cell(row + 1, col)).focus()
-                    }
-                    break
-                case "ArrowLeft":
-                    event.preventDefault()
-                    if (col > 0) {
-                        document.getElementById(Ids.cell(row, col - 1)).focus()
-                    }
-                    break
-                case "ArrowRight":
-                    event.preventDefault()
-                    if (col < Sudoku.sudokuSize - 1) {
-                        document.getElementById(Ids.cell(row, col + 1)).focus()
-                    }
-                    break
-                case "Backspace":
-                case "Delete":
-                    event.preventDefault()
-                    Sudoku.setCell(row, col, 0)
-                    break
-                
-            }
-        })
-        input.addEventListener("paste", (event) => {
-            event.preventDefault()
-        })
-        input.addEventListener("input", (event) => {
-            const value = event.target.value
-            if (value === "") {
-                Sudoku.setCell(row, col, 0)
-            } else if(value.length === 1 && StringUtils.isNumeric(value) && value !== "0") {
-                Sudoku.setCell(row, col, parseInt(value))
-            } else {
-                event.target.value = ""
-                Sudoku.setCell(row, col, 0)
-            }
-        })
-        return input
+        return div
     }
 
     static sudokuTableCell(row, col) {
@@ -483,6 +518,7 @@ class Elements {
 
     static sudokuTable() {
         const table = document.createElement("table")
+        table.appendChild(this.sudokuHiddenInput())
         table.appendChild(this.sudokuTableBody())
         return table
     }
@@ -496,7 +532,10 @@ function addSudokuTable() {
     main.appendChild(sudokuTable)
 
     function recalculateSudokuCellSize() {
-        const sudokuCellSize = Math.max(Math.floor(Math.min(window.innerWidth, window.innerHeight) / Sudoku.sudokuSize / Math.sqrt(2)), 24)
+        const sudokuCellSize = Math.max(
+            Math.floor(Math.min(window.innerWidth, window.innerHeight) / Sudoku.sudokuSize / Math.sqrt(2)),
+            24
+        )
         Elements.sudokuCellSizeChange(sudokuCellSize)
     }
 
