@@ -436,7 +436,7 @@ class Sudoku {
                             const row = subsetIndices[j][0]
                             const col = subsetIndices[j][1]
                             if (possibleValuesForCells.matrix[row][col].length > subset.length) {
-                                possibleValuesForCells.matrix[row][col] = subset
+                                possibleValuesForCells.matrix[row][col] = possibleValuesForCells.matrix[row][col].filter((value) => subset.includes(value))
                                 changed = true
                             }
                         }
