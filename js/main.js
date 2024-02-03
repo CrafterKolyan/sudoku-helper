@@ -575,6 +575,14 @@ class Elements {
                 input.value = "0"
                 input.select()
             })
+            document.addEventListener("keydown", (event) => {
+                if (event.ctrlKey || event.altKey || event.metaKey || event.shiftKey) {
+                    return
+                }
+                if (event.key === "Escape") {
+                    this._setActiveCell(undefined, undefined)
+                }
+            })
             input.addEventListener("keydown", (event) => {
                 if (event.ctrlKey || event.altKey || event.metaKey || event.shiftKey) {
                     return
