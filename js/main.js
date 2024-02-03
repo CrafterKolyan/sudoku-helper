@@ -32,6 +32,53 @@ class ArrayUtils {
         }
         return duplicates
     }
+
+    static uniqueTuples(arr) {
+        if (arr.length === 0) {
+            return []
+        }
+        arr.sort((a, b) => a[0] - b[0] || a[1] - b[1])
+        const unique = []
+        let prev = arr[0]
+        unique.push(prev)
+        for (let i = 1; i < arr.length; ++i) {
+            if (arr[i][0] !== prev[0] || arr[i][1] !== prev[1]) {
+                unique.push(arr[i])
+                prev = arr[i]
+            }
+        }
+        return unique
+    }
+
+    static subsets(arr, k) {
+        if (k === 0) {
+            return [[]]
+        } else if (arr.length === 0) {
+            return []
+        } else if (arr.length === k) {
+            return [arr]
+        } else if (arr.length < k) {
+            return []
+        }
+        const result = []
+        for (let i = 0; i < arr.length; ++i) {
+            const first = arr[i]
+            const rest = arr.slice(i + 1)
+            const restSubsets = this.subsets(rest, k - 1)
+            for (let j = 0; j < restSubsets.length; ++j) {
+                result.push([first, ...restSubsets[j]])
+            }
+        }
+        return result
+    }
+
+    static allSubsets(arr, minSize, maxSize) {
+        const result = []
+        for (let i = minSize; i <= maxSize; ++i) {
+            result.push(...this.subsets(arr, i))
+        }
+        return result
+    }
 }
 
 class Matrix {
@@ -256,32 +303,47 @@ class Sudoku {
         let sudoku = this.sudokuInput.clone()
         let possibleValuesForCells = new Matrix(this.sudokuSize, this.sudokuSize, [])
         let changed = true
+        let recomputePossibleValuesCells = true
         while (changed) {
             changed = false
+            if (recomputePossibleValuesCells) {
+                for (let i = 0; i < this.sudokuSize; ++i) {
+                    for (let j = 0; j < this.sudokuSize; ++j) {
+                        if (sudoku.matrix[i][j] === 0) {
+                            let possibleValuesForCell = []
+                            for (let k = 1; k <= this.sudokuSize; ++k) {
+                                if (
+                                    !sudoku.matrix[i].includes(k) &&
+                                    !this.column(sudoku, j).includes(k) &&
+                                    !this.block(sudoku, this.blockNumber(i, j)).includes(k)
+                                ) {
+                                    possibleValuesForCell.push(k)
+                                }
+                            }
+                            if (possibleValuesForCell.length === 1) {
+                                sudoku.matrix[i][j] = possibleValuesForCell[0]
+                                changed = true
+                            }
+                            possibleValuesForCells.matrix[i][j] = possibleValuesForCell
+                        } else {
+                            possibleValuesForCells.matrix[i][j] = []
+                        }
+                    }
+                }
+                recomputePossibleValuesCells = false
+            }
             for (let i = 0; i < this.sudokuSize; ++i) {
                 for (let j = 0; j < this.sudokuSize; ++j) {
-                    if (sudoku.matrix[i][j] === 0) {
-                        let possibleValuesForCell = []
-                        for (let k = 1; k <= this.sudokuSize; ++k) {
-                            if (
-                                !sudoku.matrix[i].includes(k) &&
-                                !this.column(sudoku, j).includes(k) &&
-                                !this.block(sudoku, this.blockNumber(i, j)).includes(k)
-                            ) {
-                                possibleValuesForCell.push(k)
-                            }
-                        }
-                        if (possibleValuesForCell.length === 1) {
-                            sudoku.matrix[i][j] = possibleValuesForCell[0]
-                            changed = true
-                        }
-                        possibleValuesForCells.matrix[i][j] = possibleValuesForCell
-                    } else {
+                    if (possibleValuesForCells.matrix[i][j].length === 1) {
+                        console.log(i, j, possibleValuesForCells.matrix[i][j][0])
+                        sudoku.matrix[i][j] = possibleValuesForCells.matrix[i][j][0]
                         possibleValuesForCells.matrix[i][j] = []
+                        changed = true
                     }
                 }
             }
             if (changed) {
+                recomputePossibleValuesCells = true
                 continue
             }
             for (let blockNumber = 0; blockNumber < this.sudokuSize; ++blockNumber) {
@@ -299,9 +361,14 @@ class Sudoku {
                         let row = possibleIndices[0][0]
                         let col = possibleIndices[0][1]
                         sudoku.matrix[row][col] = k
+                        possibleValuesForCells.matrix[row][col] = []
                         changed = true
                     }
                 }
+            }
+            if (changed) {
+                recomputePossibleValuesCells = true
+                continue
             }
             for (let i = 0; i < this.sudokuSize; ++i) {
                 for (let k = 1; k <= this.sudokuSize; ++k) {
@@ -314,9 +381,14 @@ class Sudoku {
                     if (possibleIndices.length === 1) {
                         let col = possibleIndices[0]
                         sudoku.matrix[i][col] = k
+                        possibleValuesForCells.matrix[i][col] = []
                         changed = true
                     }
                 }
+            }
+            if (changed) {
+                recomputePossibleValuesCells = true
+                continue
             }
             for (let j = 0; j < this.sudokuSize; ++j) {
                 for (let k = 1; k <= this.sudokuSize; ++k) {
@@ -329,7 +401,51 @@ class Sudoku {
                     if (possibleIndices.length === 1) {
                         let row = possibleIndices[0]
                         sudoku.matrix[row][j] = k
+                        possibleValuesForCells.matrix[row][j] = []
                         changed = true
+                    }
+                }
+            }
+            if (changed) {
+                recomputePossibleValuesCells = true
+                continue
+            }
+            for (let blockNumber = 0; blockNumber < this.sudokuSize; ++blockNumber) {
+                const blockIndices = this.blockIndices(blockNumber)
+                let emptyValues = []
+                const hashIndices = new Array(this.sudokuSize + 1).fill().map(() => [])
+                for (let i = 0; i < this.sudokuSize; ++i) {
+                    emptyValues.push(i + 1)
+                }
+                for (let i = 0; i < blockIndices.length; ++i) {
+                    const row = blockIndices[i][0]
+                    const col = blockIndices[i][1]
+                    if (sudoku.matrix[row][col] !== 0) {
+                        emptyValues = emptyValues.filter((value) => value !== sudoku.matrix[row][col])
+                    } else {
+                        for (let k = 0; k < possibleValuesForCells.matrix[row][col].length; ++k) {
+                            hashIndices[possibleValuesForCells.matrix[row][col][k]].push([row, col])
+                        }
+                    }
+                }
+                const allSubsets = ArrayUtils.allSubsets(emptyValues, 2, 3)
+                for (let i = 0; i < allSubsets.length; ++i) {
+                    const subset = allSubsets[i]
+                    let subsetIndices = []
+                    for (let j = 0; j < subset.length; ++j) {
+                        subsetIndices.push(...hashIndices[subset[j]])
+                    }
+                    subsetIndices = ArrayUtils.uniqueTuples(subsetIndices)
+                    if (subset.length === subsetIndices.length) {
+                        for (let j = 0; j < subsetIndices.length; ++j) {
+                            const row = subsetIndices[j][0]
+                            const col = subsetIndices[j][1]
+                            if (possibleValuesForCells.matrix[row][col].length > subset.length) {
+                                console.log(row, col, subset)
+                                possibleValuesForCells.matrix[row][col] = subset
+                                changed = true
+                            }
+                        }
                     }
                 }
             }
