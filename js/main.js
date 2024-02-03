@@ -575,7 +575,7 @@ class Elements {
                 input.value = "0"
                 input.select()
             })
-            input.addEventListener("onfocusout", () => {
+            input.addEventListener("blur", () => {
                 this._setActiveCell(undefined, undefined)
             })
             input.addEventListener("keydown", (event) => {
