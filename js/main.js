@@ -629,7 +629,7 @@ class Elements {
                         }
                         break
                 }
-                if (event.key >= "1" && event.key <= "9") {
+                if (event.key >= "1" && event.key <= "9" && this._activeCellRow !== undefined && this._activeCellCol !== undefined) {
                     Sudoku.setCell(this._activeCellRow, this._activeCellCol, parseInt(event.key))
                 }
             })
