@@ -553,6 +553,8 @@ class Elements {
             this._sudokuHiddenInput.value = "0"
             this._sudokuHiddenInput.select()
             this._sudokuHiddenInput.focus()
+        } else {
+            this._sudokuHiddenInput.blur()
         }
     }
 
@@ -578,7 +580,6 @@ class Elements {
                     return
                 }
                 switch (event.key) {
-                    case "Escape":
                     case "Backspace":
                     case "Delete":
                     case "ArrowUp":
@@ -598,6 +599,7 @@ class Elements {
                         event.preventDefault()
                 }
                 switch (event.key) {
+                    case "Esc":
                     case "Escape":
                         this._setActiveCell(undefined, undefined)
                     case "Backspace":
