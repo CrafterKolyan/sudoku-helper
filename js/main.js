@@ -735,7 +735,7 @@ function addSudokuTable() {
     function recalculateSudokuCellSize() {
         const sudokuCellSize = Math.max(
             Math.floor(Math.min(window.innerWidth, window.innerHeight) / Sudoku.sudokuSize / Math.sqrt(2)),
-            24
+            16
         )
         Elements.sudokuCellSizeChange(sudokuCellSize)
     }
