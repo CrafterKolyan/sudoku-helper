@@ -320,10 +320,6 @@ class Sudoku {
                                     possibleValuesForCell.push(k)
                                 }
                             }
-                            if (possibleValuesForCell.length === 1) {
-                                sudoku.matrix[i][j] = possibleValuesForCell[0]
-                                changed = true
-                            }
                             possibleValuesForCells.matrix[i][j] = possibleValuesForCell
                         } else {
                             possibleValuesForCells.matrix[i][j] = []
@@ -335,7 +331,6 @@ class Sudoku {
             for (let i = 0; i < this.sudokuSize; ++i) {
                 for (let j = 0; j < this.sudokuSize; ++j) {
                     if (possibleValuesForCells.matrix[i][j].length === 1) {
-                        console.log(i, j, possibleValuesForCells.matrix[i][j][0])
                         sudoku.matrix[i][j] = possibleValuesForCells.matrix[i][j][0]
                         possibleValuesForCells.matrix[i][j] = []
                         changed = true
@@ -441,7 +436,6 @@ class Sudoku {
                             const row = subsetIndices[j][0]
                             const col = subsetIndices[j][1]
                             if (possibleValuesForCells.matrix[row][col].length > subset.length) {
-                                console.log(row, col, subset)
                                 possibleValuesForCells.matrix[row][col] = subset
                                 changed = true
                             }
