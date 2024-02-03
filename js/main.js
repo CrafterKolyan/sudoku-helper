@@ -574,6 +574,9 @@ class Elements {
                 input.select()
             })
             input.addEventListener("keydown", (event) => {
+                if (event.ctrlKey || event.altKey || event.metaKey || event.shiftKey) {
+                    return
+                }
                 switch (event.key) {
                     case "Escape":
                     case "Backspace":
