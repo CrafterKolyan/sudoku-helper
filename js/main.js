@@ -752,8 +752,17 @@ function addSudokuTable() {
     recalculateSudokuCellSize()
 }
 
+function addServiceWorkerIfSupported() {
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/sudoku-helper/service_worker.js").then((registration) => {
+            registration.update()
+        })
+    }
+}
+
 function initialize() {
     addSudokuTable()
+    addServiceWorkerIfSupported()
 }
 
 window.addEventListener("load", initialize)
