@@ -25,7 +25,7 @@ export class ArrayUtils {
         return duplicates
     }
 
-    static uniqueTuples(arr: [any, any][]) {
+    static uniqueTuples(arr: [number, number][]) {
         if (arr.length === 0) {
             return []
         }
