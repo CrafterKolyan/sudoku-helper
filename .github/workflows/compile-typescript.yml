@@ -1,4 +1,4 @@
-name: "Compile typescrpt"
+name: "Compile Typescript"
 
 on:
   push:
