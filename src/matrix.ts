@@ -31,7 +31,7 @@ export class Matrix<T> {
     }
 
     static fromString(str: string) {
-        const matrix = new Matrix(0, 0, 0)
+        const matrix: Matrix<number> = new Matrix(0, 0)
         matrix.#matrix = JSON.parse(str)
         return matrix
     }

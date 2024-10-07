@@ -9,10 +9,10 @@ export class Sudoku {
     static sudokuSize = this.sudokuN * this.sudokuN
     static sudokuInput = new Matrix(this.sudokuSize, this.sudokuSize, 0)
 
-    static load(sudoku: number[][]) {
+    static load(sudoku: Matrix<number>) {
         for (let i = 0; i < this.sudokuSize; ++i) {
             for (let j = 0; j < this.sudokuSize; ++j) {
-                this.setCellNoRecompute(i, j, sudoku[i][j])
+                this.setCellNoRecompute(i, j, sudoku.matrix[i][j])
             }
         }
         this.validateSudoku()
@@ -357,12 +357,12 @@ export class Sudoku {
     }
 
     static fromString(str: string) {
-        let matrix = Matrix.fromString(str)
+        let matrix: Matrix<number> = Matrix.fromString(str)
         if (matrix.length != this.sudokuSize) {
             throw new IncorrectSudokuSize(
                 "Got incorrect number of rows in sudoku. Expected: ".concat(this.sudokuSize.toString(), ". Actual: ", matrix.length.toString())
             )
         }
-        this.load(matrix.matrix)
+        this.load(matrix)
     }
 }

@@ -115,7 +115,7 @@
       return JSON.stringify(this.#matrix);
     }
     static fromString(str) {
-      const matrix = new _Matrix(0, 0, 0);
+      const matrix = new _Matrix(0, 0);
       matrix.#matrix = JSON.parse(str);
       return matrix;
     }
@@ -159,7 +159,7 @@
     static load(sudoku) {
       for (let i = 0; i < this.sudokuSize; ++i) {
         for (let j = 0; j < this.sudokuSize; ++j) {
-          this.setCellNoRecompute(i, j, sudoku[i][j]);
+          this.setCellNoRecompute(i, j, sudoku.matrix[i][j]);
         }
       }
       this.validateSudoku();
@@ -484,7 +484,7 @@
           "Got incorrect number of rows in sudoku. Expected: ".concat(this.sudokuSize.toString(), ". Actual: ", matrix.length.toString())
         );
       }
-      this.load(matrix.matrix);
+      this.load(matrix);
     }
   };
 
