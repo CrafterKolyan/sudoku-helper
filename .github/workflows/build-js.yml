@@ -3,7 +3,7 @@ name: "Build Javascript module"
 on:
   push:
     branches:
-      - master
+      - main
   workflow_dispatch:
 
 jobs:
