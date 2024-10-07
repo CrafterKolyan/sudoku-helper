@@ -1,10 +1,8 @@
-export class Matrix {
-    #matrix: number[][]
+export class Matrix<T> {
+    #matrix: T[][]
 
-    constructor(rows: number, cols: number, value: any) {
-        this.#matrix = Array(rows)
-            .fill(undefined)
-            .map(() => Array(cols).fill(value))
+    constructor(rows: number, cols: number, value?: T) {
+        this.#matrix = new Array(rows).fill(undefined).map(() => Array(cols).fill(value))
     }
 
     get matrix() {
@@ -15,11 +13,11 @@ export class Matrix {
         return this.#matrix.length
     }
 
-    clone() {
+    clone(): Matrix<T> {
         if (this.#matrix.length === 0) {
-            return new Matrix(0, 0, 0)
+            return new Matrix(0, 0)
         }
-        const clone = new Matrix(this.#matrix.length, this.#matrix[0].length, 0)
+        const clone: Matrix<T> = new Matrix(this.#matrix.length, this.#matrix[0].length)
         for (let i = 0; i < this.#matrix.length; ++i) {
             for (let j = 0; j < this.#matrix[0].length; ++j) {
                 clone.matrix[i][j] = this.#matrix[i][j]

@@ -9,3 +9,9 @@ export class IncorrectSudokuSize extends Error {
         super(message)
     }
 }
+
+export class ElementNotFound extends Error {
+    constructor(message: string) {
+        super(message)
+    }
+}

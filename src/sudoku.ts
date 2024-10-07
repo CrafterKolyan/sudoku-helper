@@ -1,14 +1,14 @@
 import { ArrayUtils } from "./array_utils"
 import { Matrix } from "./matrix"
 import { Ids } from "./ids"
-import { IncorrectSudokuSize } from "./errors"
+import { ElementNotFound, IncorrectSudokuSize } from "./errors"
 
 export class Sudoku {
     static sudokuN = 3
     static sudokuSize = this.sudokuN * this.sudokuN
     static sudokuInput = new Matrix(this.sudokuSize, this.sudokuSize, 0)
 
-    static load(sudoku) {
+    static load(sudoku: number[][]) {
         for (let i = 0; i < this.sudokuSize; ++i) {
             for (let j = 0; j < this.sudokuSize; ++j) {
                 this.setCellNoRecompute(i, j, sudoku[i][j])
@@ -18,7 +18,7 @@ export class Sudoku {
         this.solveSudokuAndFillCells()
     }
 
-    static column(sudoku, col) {
+    static column(sudoku: Matrix<number>, col: number) {
         let column = []
         for (let i = 0; i < this.sudokuSize; ++i) {
             column.push(sudoku.matrix[i][col])
@@ -26,11 +26,11 @@ export class Sudoku {
         return column
     }
 
-    static blockNumber(row, col) {
+    static blockNumber(row: number, col: number) {
         return this.sudokuN * Math.floor(row / this.sudokuN) + Math.floor(col / this.sudokuN)
     }
 
-    static block(sudoku, blockNumber) {
+    static block(sudoku: Matrix<number>, blockNumber: number) {
         let block = []
         let startI = Math.floor(blockNumber / this.sudokuN) * this.sudokuN
         let startJ = (blockNumber % this.sudokuN) * this.sudokuN
@@ -42,7 +42,7 @@ export class Sudoku {
         return block
     }
 
-    static blockIndices(blockNumber) {
+    static blockIndices(blockNumber: number) {
         let indices = []
         let startI = Math.floor(blockNumber / this.sudokuN) * this.sudokuN
         let startJ = (blockNumber % this.sudokuN) * this.sudokuN
@@ -54,9 +54,12 @@ export class Sudoku {
         return indices
     }
 
-    static setCellNoRecompute(row, col, value) {
-        let div = document.getElementById(Ids.cell(row, col))
-        let valueDiv = document.getElementById(Ids.cellValue(row, col))
+    static setCellNoRecompute(row: number, col: number, value: number) {
+        const div = document.getElementById(Ids.cell(row, col))
+        const valueDiv = document.getElementById(Ids.cellValue(row, col))
+        if (div == null || valueDiv === null) {
+            throw new ElementNotFound("div or valueDiv not found")
+        }
         if (value !== 0) {
             valueDiv.innerText = value.toString()
             div.classList.add("sudoku-cell-input")
@@ -72,14 +75,17 @@ export class Sudoku {
         this.sudokuInput.matrix[row][col] = value
     }
 
-    static setCell(row, col, value) {
+    static setCell(row: number, col: number, value: number) {
         this.setCellNoRecompute(row, col, value)
         this.validateSudoku()
         this.solveSudokuAndFillCells()
     }
 
-    static setCellComputed(row, col, value) {
+    static setCellComputed(row: number, col: number, value: number) {
         let valueDiv = document.getElementById(Ids.cellValue(row, col))
+        if (valueDiv === null) {
+            throw new ElementNotFound("valueDiv not found")
+        }
         if (value !== 0) {
             valueDiv.innerText = value.toString()
             this.setCellCandidates(row, col, [])
@@ -90,28 +96,37 @@ export class Sudoku {
         }
     }
 
-    static showCellCandidates(row, col) {
+    static showCellCandidates(row: number, col: number) {
         for (let i = 0; i < this.sudokuN; ++i) {
             for (let j = 0; j < this.sudokuN; ++j) {
                 let candidateDiv = document.getElementById(Ids.cellCandidate(row, col, i, j))
+                if (candidateDiv === null) {
+                    throw new ElementNotFound("candidateDiv not found")
+                }
                 candidateDiv.classList.remove("display-none")
             }
         }
     }
 
-    static hideCellCandidates(row, col) {
+    static hideCellCandidates(row: number, col: number) {
         for (let i = 0; i < this.sudokuN; ++i) {
             for (let j = 0; j < this.sudokuN; ++j) {
                 let candidateDiv = document.getElementById(Ids.cellCandidate(row, col, i, j))
+                if (candidateDiv === null) {
+                    throw new ElementNotFound("candidateDiv not found")
+                }
                 candidateDiv.classList.add("display-none")
             }
         }
     }
 
-    static setCellCandidates(row, col, candidates) {
+    static setCellCandidates(row: number, col: number, candidates: number[]) {
         for (let i = 0; i < this.sudokuN; ++i) {
             for (let j = 0; j < this.sudokuN; ++j) {
                 let candidateDiv = document.getElementById(Ids.cellCandidate(row, col, i, j))
+                if (candidateDiv === null) {
+                    throw new ElementNotFound("candidateDiv not found")
+                }
                 if (candidates.includes(i * this.sudokuN + j + 1)) {
                     candidateDiv.classList.remove("hidden")
                 } else {
@@ -121,36 +136,52 @@ export class Sudoku {
         }
     }
 
-    static validateRow(row) {
+    static validateRow(row: number) {
         const argDuplicates = ArrayUtils.argDuplicates(this.sudokuInput.matrix[row])
         for (let i = 0; i < argDuplicates.length; ++i) {
-            document.getElementById(Ids.cell(row, argDuplicates[i])).classList.add("sudoku-cell-invalid")
+            const cellDiv = document.getElementById(Ids.cell(row, argDuplicates[i]))
+            if (cellDiv === null) {
+                throw new ElementNotFound("cellDiv not found")
+            }
+            cellDiv.classList.add("sudoku-cell-invalid")
         }
     }
 
-    static validateColumn(col) {
+    static validateColumn(col: number) {
         const column = this.column(this.sudokuInput, col)
         const argDuplicates = ArrayUtils.argDuplicates(column)
         for (let i = 0; i < argDuplicates.length; ++i) {
-            document.getElementById(Ids.cell(argDuplicates[i], col)).classList.add("sudoku-cell-invalid")
+            const cellDiv = document.getElementById(Ids.cell(argDuplicates[i], col))
+            if (cellDiv === null) {
+                throw new ElementNotFound("cellDiv not found")
+            }
+            cellDiv.classList.add("sudoku-cell-invalid")
         }
     }
 
-    static validateBlock(blockNumber) {
+    static validateBlock(blockNumber: number) {
         const block = this.block(this.sudokuInput, blockNumber)
         const blockIndices = this.blockIndices(blockNumber)
         const argDuplicates = ArrayUtils.argDuplicates(block)
         for (let i = 0; i < argDuplicates.length; ++i) {
             let row = blockIndices[argDuplicates[i]][0]
             let col = blockIndices[argDuplicates[i]][1]
-            document.getElementById(Ids.cell(row, col)).classList.add("sudoku-cell-invalid")
+            const cellDiv = document.getElementById(Ids.cell(row, col))
+            if (cellDiv === null) {
+                throw new ElementNotFound("cellDiv not found")
+            }
+            cellDiv.classList.add("sudoku-cell-invalid")
         }
     }
 
     static clearInvalid() {
         for (let i = 0; i < this.sudokuSize; ++i) {
             for (let j = 0; j < this.sudokuSize; ++j) {
-                document.getElementById(Ids.cell(i, j)).classList.remove("sudoku-cell-invalid")
+                const cellDiv = document.getElementById(Ids.cell(i, j))
+                if (cellDiv === null) {
+                    throw new ElementNotFound("cellDiv not found")
+                }
+                cellDiv.classList.remove("sudoku-cell-invalid")
             }
         }
     }
@@ -180,9 +211,9 @@ export class Sudoku {
         this.validateBlocks()
     }
 
-    static solveSudoku() {
+    static solveSudoku(): [Matrix<number>, Matrix<number[]>] {
         let sudoku = this.sudokuInput.clone()
-        let possibleValuesForCells = new Matrix(this.sudokuSize, this.sudokuSize, [])
+        let possibleValuesForCells: Matrix<number[]> = new Matrix(this.sudokuSize, this.sudokuSize, [])
         let changed = true
         let recomputePossibleValuesCells = true
         while (changed) {
@@ -191,7 +222,7 @@ export class Sudoku {
                 for (let i = 0; i < this.sudokuSize; ++i) {
                     for (let j = 0; j < this.sudokuSize; ++j) {
                         if (sudoku.matrix[i][j] === 0) {
-                            let possibleValuesForCell = []
+                            let possibleValuesForCell: number[] = []
                             for (let k = 1; k <= this.sudokuSize; ++k) {
                                 if (
                                     !sudoku.matrix[i].includes(k) &&
@@ -289,7 +320,7 @@ export class Sudoku {
             for (let blockNumber = 0; blockNumber < this.sudokuSize; ++blockNumber) {
                 const blockIndices = this.blockIndices(blockNumber)
                 let emptyValues = []
-                const hashIndices = new Array(this.sudokuSize + 1).fill().map(() => [])
+                const hashIndices: [number, number][][] = new Array(this.sudokuSize + 1).fill(undefined).map(() => [])
                 for (let i = 0; i < this.sudokuSize; ++i) {
                     emptyValues.push(i + 1)
                 }
@@ -351,11 +382,11 @@ export class Sudoku {
         return this.sudokuInput.toString()
     }
 
-    static fromString(str) {
+    static fromString(str: string) {
         let matrix = Matrix.fromString(str)
         if (matrix.length != this.sudokuSize) {
             throw new IncorrectSudokuSize(
-                "Got incorrect number of rows in sudoku. Expected: ".concat(this.sudokuSize, ". Actual: ", matrix.length)
+                "Got incorrect number of rows in sudoku. Expected: ".concat(this.sudokuSize.toString(), ". Actual: ", matrix.length.toString())
             )
         }
         this.load(matrix.matrix)

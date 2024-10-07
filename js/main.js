@@ -11,6 +11,11 @@
       super(message);
     }
   };
+  var ElementNotFound = class extends Error {
+    constructor(message) {
+      super(message);
+    }
+  };
 
   // src/array_utils.ts
   var ArrayUtils = class {
@@ -86,7 +91,7 @@
   var Matrix = class _Matrix {
     #matrix;
     constructor(rows, cols, value) {
-      this.#matrix = Array(rows).fill(void 0).map(() => Array(cols).fill(value));
+      this.#matrix = new Array(rows).fill(void 0).map(() => Array(cols).fill(value));
     }
     get matrix() {
       return this.#matrix;
@@ -96,9 +101,9 @@
     }
     clone() {
       if (this.#matrix.length === 0) {
-        return new _Matrix(0, 0, 0);
+        return new _Matrix(0, 0);
       }
-      const clone = new _Matrix(this.#matrix.length, this.#matrix[0].length, 0);
+      const clone = new _Matrix(this.#matrix.length, this.#matrix[0].length);
       for (let i = 0; i < this.#matrix.length; ++i) {
         for (let j = 0; j < this.#matrix[0].length; ++j) {
           clone.matrix[i][j] = this.#matrix[i][j];
@@ -129,11 +134,17 @@
     }
   };
 
-  // src/sudoku.js
+  // src/sudoku.ts
   var Sudoku = class {
-    static sudokuN = 3;
-    static sudokuSize = this.sudokuN * this.sudokuN;
-    static sudokuInput = new Matrix(this.sudokuSize, this.sudokuSize, 0);
+    static {
+      this.sudokuN = 3;
+    }
+    static {
+      this.sudokuSize = this.sudokuN * this.sudokuN;
+    }
+    static {
+      this.sudokuInput = new Matrix(this.sudokuSize, this.sudokuSize, 0);
+    }
     static load(sudoku) {
       for (let i = 0; i < this.sudokuSize; ++i) {
         for (let j = 0; j < this.sudokuSize; ++j) {
@@ -176,8 +187,11 @@
       return indices;
     }
     static setCellNoRecompute(row, col, value) {
-      let div = document.getElementById(Ids.cell(row, col));
-      let valueDiv = document.getElementById(Ids.cellValue(row, col));
+      const div = document.getElementById(Ids.cell(row, col));
+      const valueDiv = document.getElementById(Ids.cellValue(row, col));
+      if (div == null || valueDiv === null) {
+        throw new ElementNotFound("div or valueDiv not found");
+      }
       if (value !== 0) {
         valueDiv.innerText = value.toString();
         div.classList.add("sudoku-cell-input");
@@ -199,6 +213,9 @@
     }
     static setCellComputed(row, col, value) {
       let valueDiv = document.getElementById(Ids.cellValue(row, col));
+      if (valueDiv === null) {
+        throw new ElementNotFound("valueDiv not found");
+      }
       if (value !== 0) {
         valueDiv.innerText = value.toString();
         this.setCellCandidates(row, col, []);
@@ -212,6 +229,9 @@
       for (let i = 0; i < this.sudokuN; ++i) {
         for (let j = 0; j < this.sudokuN; ++j) {
           let candidateDiv = document.getElementById(Ids.cellCandidate(row, col, i, j));
+          if (candidateDiv === null) {
+            throw new ElementNotFound("candidateDiv not found");
+          }
           candidateDiv.classList.remove("display-none");
         }
       }
@@ -220,6 +240,9 @@
       for (let i = 0; i < this.sudokuN; ++i) {
         for (let j = 0; j < this.sudokuN; ++j) {
           let candidateDiv = document.getElementById(Ids.cellCandidate(row, col, i, j));
+          if (candidateDiv === null) {
+            throw new ElementNotFound("candidateDiv not found");
+          }
           candidateDiv.classList.add("display-none");
         }
       }
@@ -228,6 +251,9 @@
       for (let i = 0; i < this.sudokuN; ++i) {
         for (let j = 0; j < this.sudokuN; ++j) {
           let candidateDiv = document.getElementById(Ids.cellCandidate(row, col, i, j));
+          if (candidateDiv === null) {
+            throw new ElementNotFound("candidateDiv not found");
+          }
           if (candidates.includes(i * this.sudokuN + j + 1)) {
             candidateDiv.classList.remove("hidden");
           } else {
@@ -239,14 +265,22 @@
     static validateRow(row) {
       const argDuplicates = ArrayUtils.argDuplicates(this.sudokuInput.matrix[row]);
       for (let i = 0; i < argDuplicates.length; ++i) {
-        document.getElementById(Ids.cell(row, argDuplicates[i])).classList.add("sudoku-cell-invalid");
+        const cellDiv = document.getElementById(Ids.cell(row, argDuplicates[i]));
+        if (cellDiv === null) {
+          throw new ElementNotFound("cellDiv not found");
+        }
+        cellDiv.classList.add("sudoku-cell-invalid");
       }
     }
     static validateColumn(col) {
       const column = this.column(this.sudokuInput, col);
       const argDuplicates = ArrayUtils.argDuplicates(column);
       for (let i = 0; i < argDuplicates.length; ++i) {
-        document.getElementById(Ids.cell(argDuplicates[i], col)).classList.add("sudoku-cell-invalid");
+        const cellDiv = document.getElementById(Ids.cell(argDuplicates[i], col));
+        if (cellDiv === null) {
+          throw new ElementNotFound("cellDiv not found");
+        }
+        cellDiv.classList.add("sudoku-cell-invalid");
       }
     }
     static validateBlock(blockNumber) {
@@ -256,13 +290,21 @@
       for (let i = 0; i < argDuplicates.length; ++i) {
         let row = blockIndices[argDuplicates[i]][0];
         let col = blockIndices[argDuplicates[i]][1];
-        document.getElementById(Ids.cell(row, col)).classList.add("sudoku-cell-invalid");
+        const cellDiv = document.getElementById(Ids.cell(row, col));
+        if (cellDiv === null) {
+          throw new ElementNotFound("cellDiv not found");
+        }
+        cellDiv.classList.add("sudoku-cell-invalid");
       }
     }
     static clearInvalid() {
       for (let i = 0; i < this.sudokuSize; ++i) {
         for (let j = 0; j < this.sudokuSize; ++j) {
-          document.getElementById(Ids.cell(i, j)).classList.remove("sudoku-cell-invalid");
+          const cellDiv = document.getElementById(Ids.cell(i, j));
+          if (cellDiv === null) {
+            throw new ElementNotFound("cellDiv not found");
+          }
+          cellDiv.classList.remove("sudoku-cell-invalid");
         }
       }
     }
@@ -392,7 +434,7 @@
         for (let blockNumber = 0; blockNumber < this.sudokuSize; ++blockNumber) {
           const blockIndices = this.blockIndices(blockNumber);
           let emptyValues = [];
-          const hashIndices = new Array(this.sudokuSize + 1).fill().map(() => []);
+          const hashIndices = new Array(this.sudokuSize + 1).fill(void 0).map(() => []);
           for (let i = 0; i < this.sudokuSize; ++i) {
             emptyValues.push(i + 1);
           }
@@ -455,7 +497,7 @@
       let matrix = Matrix.fromString(str);
       if (matrix.length != this.sudokuSize) {
         throw new IncorrectSudokuSize(
-          "Got incorrect number of rows in sudoku. Expected: ".concat(this.sudokuSize, ". Actual: ", matrix.length)
+          "Got incorrect number of rows in sudoku. Expected: ".concat(this.sudokuSize.toString(), ". Actual: ", matrix.length.toString())
         );
       }
       this.load(matrix.matrix);
