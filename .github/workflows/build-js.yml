@@ -1,4 +1,4 @@
-name: "Build Javascript module"
+name: "Autobuild Javascript module"
 
 on:
   push:
