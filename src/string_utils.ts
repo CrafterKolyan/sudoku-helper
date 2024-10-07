@@ -1,5 +1,5 @@
 export class StringUtils {
-    static isNumeric(str: string) {
+    static isNumeric(str) {
         return /^\d+$/.test(str)
     }
 }
