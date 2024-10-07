@@ -24,7 +24,7 @@ jobs:
 
     - name: Build main Javascript module
       run: |
-        npx esbuild src/main.js --outfile=js/main.js --bundle
+        npx esbuild src/main.ts --outfile=js/main.js --bundle
 
     - name: Commit changed files
       if: always()
