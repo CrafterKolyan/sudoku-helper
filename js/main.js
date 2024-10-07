@@ -825,12 +825,12 @@ function addKeybindings() {
     document.addEventListener("keydown", (event) => {
         switch (event.key) {
             case "v":
-                if (event.ctrlKey && !event.altKey && !event.shiftKey) {
+                if ((event.ctrlKey || event.metaKey) && !event.altKey && !event.shiftKey) {
                     pasteSudokuTable()
                 }
                 break
             case "c":
-                if (event.ctrlKey && !event.altKey && !event.shiftKey) {
+                if ((event.ctrlKey || event.metaKey) && !event.altKey && !event.shiftKey) {
                     copySudokuTable()
                 }
                 break
