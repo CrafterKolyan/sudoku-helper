@@ -94,6 +94,10 @@ class Matrix {
         return this.#matrix
     }
 
+    get length() {
+        return this.#matrix.length;
+    }
+
     clone() {
         if (this.#matrix.length === 0) {
             return new Matrix(0, 0, 0)
@@ -105,6 +109,16 @@ class Matrix {
             }
         }
         return clone
+    }
+
+    toString() {
+        return JSON.stringify(this.#matrix)
+    }
+
+    static fromString(str) {
+        const matrix = new Matrix(0, 0, 0)
+        matrix.#matrix = JSON.parse(str)
+        return matrix
     }
 }
 
@@ -119,6 +133,18 @@ class Ids {
 
     static cellCandidate(row, col, innerRow, innerCol) {
         return "cell-candidate-" + row.toString() + "-" + col.toString() + "-" + innerRow.toString() + "-" + innerCol.toString()
+    }
+}
+
+class IncorrectSudokuSize extends Error {
+    constructor(message) {
+        super(message);
+    }
+}
+
+class IncorrectClipboardItemsSize extends Error {
+    constructor(message) {
+        super(message);
     }
 }
 
@@ -463,6 +489,18 @@ class Sudoku {
             }
         }
     }
+
+    static toString() {
+        return this.sudokuInput.toString()
+    }
+
+    static fromString(str) {
+        let matrix = Matrix.fromString(str)
+        if (matrix.length != this.sudokuSize) {
+            throw new IncorrectSudokuSize("Got incorrect number of rows in sudoku. Expected: ".concat(this.sudokuSize, ". Actual: ", matrix.length))
+        }
+        this.load(matrix.matrix)
+    }
 }
 
 class Elements {
@@ -760,8 +798,49 @@ function addServiceWorkerIfSupported() {
     }
 }
 
+async function pasteSudokuTable() {
+    if ("clipboard" in navigator) {
+        const clipboardItems = await navigator.clipboard.read()
+        if (clipboardItems.length != 1) {
+            throw new IncorrectClipboardItemsSize("Not supporting pasting more than 1 clipboard items")
+        }
+        const clipboardItem = clipboardItems[0]
+        const onlySupportedType = "text/plain"
+        console.log(clipboardItem)
+        if (clipboardItem.types.includes(onlySupportedType)) {
+            const blob = await clipboardItem.getType(onlySupportedType)
+            const text = await blob.text()
+            Sudoku.fromString(text)
+        }
+    }
+}
+
+function copySudokuTable() {
+    if ("clipboard" in navigator) {
+        navigator.clipboard.writeText(Sudoku.toString())
+    }
+}
+
+function addKeybindings() {
+    document.addEventListener("keydown", (event) => {
+        switch (event.key) {
+            case "v":
+                if (event.ctrlKey && !event.altKey && !event.shiftKey) {
+                    pasteSudokuTable()
+                }
+                break
+            case "c":
+                if (event.ctrlKey && !event.altKey && !event.shiftKey) {
+                    copySudokuTable()
+                }
+                break
+        }
+    })
+}
+
 function initialize() {
     addSudokuTable()
+    addKeybindings()
     addServiceWorkerIfSupported()
 }
 
