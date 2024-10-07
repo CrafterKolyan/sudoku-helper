@@ -11,6 +11,7 @@ Website: [https://crafterkolyan.github.io/sudoku-helper/](https://crafterkolyan.
 ## Features
 - Simplest sudoku solver
 - If can't solve completely, shows cells that can be solved
+- Supports copying and pasting sudoku table in JSON formats
 
 ## Tested in browsers
 - Chrome
