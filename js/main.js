@@ -806,7 +806,6 @@ async function pasteSudokuTable() {
         }
         const clipboardItem = clipboardItems[0]
         const onlySupportedType = "text/plain"
-        console.log(clipboardItem)
         if (clipboardItem.types.includes(onlySupportedType)) {
             const blob = await clipboardItem.getType(onlySupportedType)
             const text = await blob.text()
