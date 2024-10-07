@@ -75,7 +75,6 @@ function initialize() {
     addSudokuTable()
     addKeybindings()
     addServiceWorkerIfSupported()
-    console.log(123)
 }
 
 window.addEventListener("load", initialize)
