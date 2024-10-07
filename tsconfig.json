@@ -8,9 +8,13 @@
         "alwaysStrict": true,
         "noFallthroughCasesInSwitch": true,
         "noImplicitAny": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
         "removeComments": true,
         "preserveConstEnums": true,
         "strict": true,
+        "strictFunctionTypes": true,
+        "strictNullChecks": true,
         "outFile": "js/main.js",
         "lib": ["es2018", "dom"]
     },

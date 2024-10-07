@@ -1,4 +1,7 @@
 "use strict";
+
+const { ElementUtils } = require("../src/element_utils");
+
 (() => {
   // src/errors.ts
   var IncorrectClipboardItemsSize = class extends Error {
@@ -187,11 +190,8 @@
       return indices;
     }
     static setCellNoRecompute(row, col, value) {
-      const div = document.getElementById(Ids.cell(row, col));
-      const valueDiv = document.getElementById(Ids.cellValue(row, col));
-      if (div == null || valueDiv === null) {
-        throw new ElementNotFound("div or valueDiv not found");
-      }
+      const div = ElementUtils.getExistingElementById(Ids.cell(row, col));
+      const valueDiv = ElementUtils.getExistingElementById(Ids.cellValue(row, col));
       if (value !== 0) {
         valueDiv.innerText = value.toString();
         div.classList.add("sudoku-cell-input");
@@ -212,10 +212,7 @@
       this.solveSudokuAndFillCells();
     }
     static setCellComputed(row, col, value) {
-      let valueDiv = document.getElementById(Ids.cellValue(row, col));
-      if (valueDiv === null) {
-        throw new ElementNotFound("valueDiv not found");
-      }
+      let valueDiv = ElementUtils.getExistingElementById(Ids.cellValue(row, col));
       if (value !== 0) {
         valueDiv.innerText = value.toString();
         this.setCellCandidates(row, col, []);
@@ -228,10 +225,7 @@
     static showCellCandidates(row, col) {
       for (let i = 0; i < this.sudokuN; ++i) {
         for (let j = 0; j < this.sudokuN; ++j) {
-          let candidateDiv = document.getElementById(Ids.cellCandidate(row, col, i, j));
-          if (candidateDiv === null) {
-            throw new ElementNotFound("candidateDiv not found");
-          }
+          let candidateDiv = ElementUtils.getExistingElementById(Ids.cellCandidate(row, col, i, j));
           candidateDiv.classList.remove("display-none");
         }
       }
@@ -239,10 +233,7 @@
     static hideCellCandidates(row, col) {
       for (let i = 0; i < this.sudokuN; ++i) {
         for (let j = 0; j < this.sudokuN; ++j) {
-          let candidateDiv = document.getElementById(Ids.cellCandidate(row, col, i, j));
-          if (candidateDiv === null) {
-            throw new ElementNotFound("candidateDiv not found");
-          }
+          let candidateDiv = ElementUtils.getExistingElementById(Ids.cellCandidate(row, col, i, j));
           candidateDiv.classList.add("display-none");
         }
       }
@@ -250,10 +241,7 @@
     static setCellCandidates(row, col, candidates) {
       for (let i = 0; i < this.sudokuN; ++i) {
         for (let j = 0; j < this.sudokuN; ++j) {
-          let candidateDiv = document.getElementById(Ids.cellCandidate(row, col, i, j));
-          if (candidateDiv === null) {
-            throw new ElementNotFound("candidateDiv not found");
-          }
+          let candidateDiv = ElementUtils.getExistingElementById(Ids.cellCandidate(row, col, i, j));
           if (candidates.includes(i * this.sudokuN + j + 1)) {
             candidateDiv.classList.remove("hidden");
           } else {
@@ -265,10 +253,7 @@
     static validateRow(row) {
       const argDuplicates = ArrayUtils.argDuplicates(this.sudokuInput.matrix[row]);
       for (let i = 0; i < argDuplicates.length; ++i) {
-        const cellDiv = document.getElementById(Ids.cell(row, argDuplicates[i]));
-        if (cellDiv === null) {
-          throw new ElementNotFound("cellDiv not found");
-        }
+        const cellDiv = ElementUtils.getExistingElementById(Ids.cell(row, argDuplicates[i]));
         cellDiv.classList.add("sudoku-cell-invalid");
       }
     }
@@ -276,10 +261,7 @@
       const column = this.column(this.sudokuInput, col);
       const argDuplicates = ArrayUtils.argDuplicates(column);
       for (let i = 0; i < argDuplicates.length; ++i) {
-        const cellDiv = document.getElementById(Ids.cell(argDuplicates[i], col));
-        if (cellDiv === null) {
-          throw new ElementNotFound("cellDiv not found");
-        }
+        const cellDiv = ElementUtils.getExistingElementById(Ids.cell(argDuplicates[i], col));
         cellDiv.classList.add("sudoku-cell-invalid");
       }
     }
@@ -300,10 +282,7 @@
     static clearInvalid() {
       for (let i = 0; i < this.sudokuSize; ++i) {
         for (let j = 0; j < this.sudokuSize; ++j) {
-          const cellDiv = document.getElementById(Ids.cell(i, j));
-          if (cellDiv === null) {
-            throw new ElementNotFound("cellDiv not found");
-          }
+          const cellDiv = ElementUtils.getExistingElementById(Ids.cell(i, j));
           cellDiv.classList.remove("sudoku-cell-invalid");
         }
       }

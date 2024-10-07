@@ -1,14 +1,12 @@
-import { ElementNotFound, IncorrectClipboardItemsSize } from "./errors"
+import {  IncorrectClipboardItemsSize } from "./errors"
 import { Sudoku } from "./sudoku"
 import { Elements } from "./elements"
+import { ElementUtils } from "./element_utils"
 
 function addSudokuTable() {
-    const main = document.getElementById("main")
+    const main = ElementUtils.getExistingElementById("main")
     const sudokuTable = Elements.sudokuTable()
     const sudokuCellStyle = Elements.sudokuStyle()
-    if (main === null) {
-        throw new ElementNotFound("main is not found")
-    }
     main.appendChild(sudokuCellStyle)
     main.appendChild(sudokuTable)
 

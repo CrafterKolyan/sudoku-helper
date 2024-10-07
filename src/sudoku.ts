@@ -1,7 +1,8 @@
 import { ArrayUtils } from "./array_utils"
 import { Matrix } from "./matrix"
 import { Ids } from "./ids"
-import { ElementNotFound, IncorrectSudokuSize } from "./errors"
+import { IncorrectSudokuSize } from "./errors"
+import { ElementUtils } from "./element_utils"
 
 export class Sudoku {
     static sudokuN = 3
@@ -55,11 +56,8 @@ export class Sudoku {
     }
 
     static setCellNoRecompute(row: number, col: number, value: number) {
-        const div = document.getElementById(Ids.cell(row, col))
-        const valueDiv = document.getElementById(Ids.cellValue(row, col))
-        if (div == null || valueDiv === null) {
-            throw new ElementNotFound("div or valueDiv not found")
-        }
+        const div = ElementUtils.getExistingElementById(Ids.cell(row, col))
+        const valueDiv = ElementUtils.getExistingElementById(Ids.cellValue(row, col))
         if (value !== 0) {
             valueDiv.innerText = value.toString()
             div.classList.add("sudoku-cell-input")
@@ -82,10 +80,7 @@ export class Sudoku {
     }
 
     static setCellComputed(row: number, col: number, value: number) {
-        let valueDiv = document.getElementById(Ids.cellValue(row, col))
-        if (valueDiv === null) {
-            throw new ElementNotFound("valueDiv not found")
-        }
+        let valueDiv = ElementUtils.getExistingElementById(Ids.cellValue(row, col))
         if (value !== 0) {
             valueDiv.innerText = value.toString()
             this.setCellCandidates(row, col, [])
@@ -99,10 +94,7 @@ export class Sudoku {
     static showCellCandidates(row: number, col: number) {
         for (let i = 0; i < this.sudokuN; ++i) {
             for (let j = 0; j < this.sudokuN; ++j) {
-                let candidateDiv = document.getElementById(Ids.cellCandidate(row, col, i, j))
-                if (candidateDiv === null) {
-                    throw new ElementNotFound("candidateDiv not found")
-                }
+                let candidateDiv = ElementUtils.getExistingElementById(Ids.cellCandidate(row, col, i, j))
                 candidateDiv.classList.remove("display-none")
             }
         }
@@ -111,10 +103,7 @@ export class Sudoku {
     static hideCellCandidates(row: number, col: number) {
         for (let i = 0; i < this.sudokuN; ++i) {
             for (let j = 0; j < this.sudokuN; ++j) {
-                let candidateDiv = document.getElementById(Ids.cellCandidate(row, col, i, j))
-                if (candidateDiv === null) {
-                    throw new ElementNotFound("candidateDiv not found")
-                }
+                let candidateDiv = ElementUtils.getExistingElementById(Ids.cellCandidate(row, col, i, j))
                 candidateDiv.classList.add("display-none")
             }
         }
@@ -123,10 +112,7 @@ export class Sudoku {
     static setCellCandidates(row: number, col: number, candidates: number[]) {
         for (let i = 0; i < this.sudokuN; ++i) {
             for (let j = 0; j < this.sudokuN; ++j) {
-                let candidateDiv = document.getElementById(Ids.cellCandidate(row, col, i, j))
-                if (candidateDiv === null) {
-                    throw new ElementNotFound("candidateDiv not found")
-                }
+                let candidateDiv = ElementUtils.getExistingElementById(Ids.cellCandidate(row, col, i, j))
                 if (candidates.includes(i * this.sudokuN + j + 1)) {
                     candidateDiv.classList.remove("hidden")
                 } else {
@@ -139,10 +125,7 @@ export class Sudoku {
     static validateRow(row: number) {
         const argDuplicates = ArrayUtils.argDuplicates(this.sudokuInput.matrix[row])
         for (let i = 0; i < argDuplicates.length; ++i) {
-            const cellDiv = document.getElementById(Ids.cell(row, argDuplicates[i]))
-            if (cellDiv === null) {
-                throw new ElementNotFound("cellDiv not found")
-            }
+            const cellDiv = ElementUtils.getExistingElementById(Ids.cell(row, argDuplicates[i]))
             cellDiv.classList.add("sudoku-cell-invalid")
         }
     }
@@ -151,10 +134,7 @@ export class Sudoku {
         const column = this.column(this.sudokuInput, col)
         const argDuplicates = ArrayUtils.argDuplicates(column)
         for (let i = 0; i < argDuplicates.length; ++i) {
-            const cellDiv = document.getElementById(Ids.cell(argDuplicates[i], col))
-            if (cellDiv === null) {
-                throw new ElementNotFound("cellDiv not found")
-            }
+            const cellDiv = ElementUtils.getExistingElementById(Ids.cell(argDuplicates[i], col))
             cellDiv.classList.add("sudoku-cell-invalid")
         }
     }
@@ -166,10 +146,7 @@ export class Sudoku {
         for (let i = 0; i < argDuplicates.length; ++i) {
             let row = blockIndices[argDuplicates[i]][0]
             let col = blockIndices[argDuplicates[i]][1]
-            const cellDiv = document.getElementById(Ids.cell(row, col))
-            if (cellDiv === null) {
-                throw new ElementNotFound("cellDiv not found")
-            }
+            const cellDiv = ElementUtils.getExistingElementById(Ids.cell(row, col))
             cellDiv.classList.add("sudoku-cell-invalid")
         }
     }
@@ -177,10 +154,7 @@ export class Sudoku {
     static clearInvalid() {
         for (let i = 0; i < this.sudokuSize; ++i) {
             for (let j = 0; j < this.sudokuSize; ++j) {
-                const cellDiv = document.getElementById(Ids.cell(i, j))
-                if (cellDiv === null) {
-                    throw new ElementNotFound("cellDiv not found")
-                }
+                const cellDiv = ElementUtils.getExistingElementById(Ids.cell(i, j))
                 cellDiv.classList.remove("sudoku-cell-invalid")
             }
         }

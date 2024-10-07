@@ -1,7 +1,7 @@
 import { StringUtils } from "./string_utils"
 import { Ids } from "./ids"
 import { Sudoku } from "./sudoku"
-import { ElementNotFound } from "./errors"
+import { ElementUtils } from "./element_utils"
 
 export class Elements {
     static _sudokuCellStyle: HTMLStyleElement
@@ -82,19 +82,13 @@ export class Elements {
 
     static _setActiveCell(row: number | undefined, col: number | undefined) {
         if (this._activeCellRow !== undefined && this._activeCellCol !== undefined) {
-            const cellDiv = document.getElementById(Ids.cell(this._activeCellRow, this._activeCellCol))
-            if (cellDiv === null) {
-                throw new ElementNotFound("cellDiv was not found")
-            }
+            const cellDiv = ElementUtils.getExistingElementById(Ids.cell(this._activeCellRow, this._activeCellCol))
             cellDiv.classList.remove("sudoku-cell-selected")
         }
         this._activeCellRow = row
         this._activeCellCol = col
         if (row !== undefined && col !== undefined) {
-            const cellDiv = document.getElementById(Ids.cell(row, col))
-            if (cellDiv === null) {
-                throw new ElementNotFound("cellDiv was not found")
-            }
+            const cellDiv = ElementUtils.getExistingElementById(Ids.cell(row, col))
             cellDiv.classList.add("sudoku-cell-selected")
             this._sudokuHiddenInput.value = "0"
             this._sudokuHiddenInput.select()
