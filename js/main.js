@@ -1,7 +1,4 @@
 "use strict";
-
-const { ElementUtils } = require("../src/element_utils");
-
 (() => {
   // src/errors.ts
   var IncorrectClipboardItemsSize = class extends Error {
@@ -134,6 +131,17 @@ const { ElementUtils } = require("../src/element_utils");
     }
     static cellCandidate(row, col, innerRow, innerCol) {
       return "cell-candidate-" + row.toString() + "-" + col.toString() + "-" + innerRow.toString() + "-" + innerCol.toString();
+    }
+  };
+
+  // src/element_utils.ts
+  var ElementUtils = class {
+    static getExistingElementById(id) {
+      const element = document.getElementById(id);
+      if (element === null) {
+        throw new ElementNotFound(id + " element was not found");
+      }
+      return element;
     }
   };
 
@@ -272,10 +280,7 @@ const { ElementUtils } = require("../src/element_utils");
       for (let i = 0; i < argDuplicates.length; ++i) {
         let row = blockIndices[argDuplicates[i]][0];
         let col = blockIndices[argDuplicates[i]][1];
-        const cellDiv = document.getElementById(Ids.cell(row, col));
-        if (cellDiv === null) {
-          throw new ElementNotFound("cellDiv not found");
-        }
+        const cellDiv = ElementUtils.getExistingElementById(Ids.cell(row, col));
         cellDiv.classList.add("sudoku-cell-invalid");
       }
     }
@@ -570,19 +575,13 @@ const { ElementUtils } = require("../src/element_utils");
     }
     static _setActiveCell(row, col) {
       if (this._activeCellRow !== void 0 && this._activeCellCol !== void 0) {
-        const cellDiv = document.getElementById(Ids.cell(this._activeCellRow, this._activeCellCol));
-        if (cellDiv === null) {
-          throw new ElementNotFound("cellDiv was not found");
-        }
+        const cellDiv = ElementUtils.getExistingElementById(Ids.cell(this._activeCellRow, this._activeCellCol));
         cellDiv.classList.remove("sudoku-cell-selected");
       }
       this._activeCellRow = row;
       this._activeCellCol = col;
       if (row !== void 0 && col !== void 0) {
-        const cellDiv = document.getElementById(Ids.cell(row, col));
-        if (cellDiv === null) {
-          throw new ElementNotFound("cellDiv was not found");
-        }
+        const cellDiv = ElementUtils.getExistingElementById(Ids.cell(row, col));
         cellDiv.classList.add("sudoku-cell-selected");
         this._sudokuHiddenInput.value = "0";
         this._sudokuHiddenInput.select();
@@ -767,12 +766,9 @@ const { ElementUtils } = require("../src/element_utils");
 
   // src/main.ts
   function addSudokuTable() {
-    const main = document.getElementById("main");
+    const main = ElementUtils.getExistingElementById("main");
     const sudokuTable = Elements.sudokuTable();
     const sudokuCellStyle = Elements.sudokuStyle();
-    if (main === null) {
-      throw new ElementNotFound("main is not found");
-    }
     main.appendChild(sudokuCellStyle);
     main.appendChild(sudokuTable);
     function recalculateSudokuCellSize() {
