@@ -1,15 +1,16 @@
 import { StringUtils } from "./string_utils"
 import { Ids } from "./ids"
 import { Sudoku } from "./sudoku"
+import { ElementNotFound } from "./errors"
 
 export class Elements {
-    static _sudokuCellStyle
+    static _sudokuCellStyle: HTMLStyleElement
     static _sudokuCellSizePx = 60
-    static _sudokuHiddenInput
-    static _activeCellRow = undefined
-    static _activeCellCol = undefined
+    static _sudokuHiddenInput: HTMLInputElement
+    static _activeCellRow: number | undefined = undefined
+    static _activeCellCol: number | undefined = undefined
 
-    static _sudokuStyleContent(sudokuCellSizePx) {
+    static _sudokuStyleContent(sudokuCellSizePx: number) {
         let hDividerWidth
         if (Sudoku.sudokuSize === 1) {
             hDividerWidth = sudokuCellSizePx + 3
@@ -74,19 +75,27 @@ export class Elements {
         return this._sudokuCellStyle
     }
 
-    static sudokuCellSizeChange(sudokuCellSizePx) {
+    static sudokuCellSizeChange(sudokuCellSizePx: number) {
         this._sudokuCellSizePx = sudokuCellSizePx
         this._sudokuCellStyle.innerHTML = this._sudokuStyleContent(sudokuCellSizePx)
     }
 
-    static _setActiveCell(row, col) {
+    static _setActiveCell(row: number | undefined, col: number | undefined) {
         if (this._activeCellRow !== undefined && this._activeCellCol !== undefined) {
-            document.getElementById(Ids.cell(this._activeCellRow, this._activeCellCol)).classList.remove("sudoku-cell-selected")
+            const cellDiv = document.getElementById(Ids.cell(this._activeCellRow, this._activeCellCol))
+            if (cellDiv === null) {
+                throw new ElementNotFound("cellDiv was not found")
+            }
+            cellDiv.classList.remove("sudoku-cell-selected")
         }
         this._activeCellRow = row
         this._activeCellCol = col
         if (row !== undefined && col !== undefined) {
-            document.getElementById(Ids.cell(row, col)).classList.add("sudoku-cell-selected")
+            const cellDiv = document.getElementById(Ids.cell(row, col))
+            if (cellDiv === null) {
+                throw new ElementNotFound("cellDiv was not found")
+            }
+            cellDiv.classList.add("sudoku-cell-selected")
             this._sudokuHiddenInput.value = "0"
             this._sudokuHiddenInput.select()
             this._sudokuHiddenInput.focus()
@@ -103,9 +112,16 @@ export class Elements {
             input.type = "number"
             input.addEventListener("input", () => {
                 if (input.value === "") {
-                    Sudoku.setCell(this._activeCellRow, this._activeCellCol, 0)
+                    if (this._activeCellRow !== undefined && this._activeCellCol !== undefined) {
+                        Sudoku.setCell(this._activeCellRow, this._activeCellCol, 0)
+                    }
                 } else if (StringUtils.isNumeric(input.value)) {
-                    if (parseInt(input.value) > 0 && parseInt(input.value) <= Sudoku.sudokuSize) {
+                    if (
+                        parseInt(input.value) > 0 &&
+                        parseInt(input.value) <= Sudoku.sudokuSize &&
+                        this._activeCellRow !== undefined &&
+                        this._activeCellCol !== undefined
+                    ) {
                         Sudoku.setCell(this._activeCellRow, this._activeCellCol, parseInt(input.value))
                     }
                 }
@@ -142,29 +158,37 @@ export class Elements {
                     case "Esc":
                     case "Escape":
                         this._setActiveCell(undefined, undefined)
+                        if (this._activeCellRow !== undefined && this._activeCellCol !== undefined) {
+                            Sudoku.setCell(this._activeCellRow, this._activeCellCol, 0)
+                        }
+                        break
                     case "Backspace":
-                        Sudoku.setCell(this._activeCellRow, this._activeCellCol, 0)
+                        if (this._activeCellRow !== undefined && this._activeCellCol !== undefined) {
+                            Sudoku.setCell(this._activeCellRow, this._activeCellCol, 0)
+                        }
                         break
                     case "Delete":
-                        Sudoku.setCell(this._activeCellRow, this._activeCellCol, 0)
+                        if (this._activeCellRow !== undefined && this._activeCellCol !== undefined) {
+                            Sudoku.setCell(this._activeCellRow, this._activeCellCol, 0)
+                        }
                         break
                     case "ArrowUp":
-                        if (this._activeCellRow > 0) {
+                        if (this._activeCellRow !== undefined && this._activeCellRow > 0) {
                             this._setActiveCell(this._activeCellRow - 1, this._activeCellCol)
                         }
                         break
                     case "ArrowDown":
-                        if (this._activeCellRow < Sudoku.sudokuSize - 1) {
+                        if (this._activeCellRow !== undefined && this._activeCellRow < Sudoku.sudokuSize - 1) {
                             this._setActiveCell(this._activeCellRow + 1, this._activeCellCol)
                         }
                         break
                     case "ArrowLeft":
-                        if (this._activeCellCol > 0) {
+                        if (this._activeCellCol !== undefined &&  this._activeCellCol > 0) {
                             this._setActiveCell(this._activeCellRow, this._activeCellCol - 1)
                         }
                         break
                     case "ArrowRight":
-                        if (this._activeCellCol < Sudoku.sudokuSize - 1) {
+                        if (this._activeCellCol !== undefined && this._activeCellCol < Sudoku.sudokuSize - 1) {
                             this._setActiveCell(this._activeCellRow, this._activeCellCol + 1)
                         }
                         break
@@ -184,14 +208,14 @@ export class Elements {
         return this._sudokuHiddenInput
     }
 
-    static sudokuTableCellValue(row, col) {
+    static sudokuTableCellValue(row: number, col: number) {
         const div = document.createElement("div")
         div.className = "sudoku-cell-value"
         div.id = Ids.cellValue(row, col)
         return div
     }
 
-    static sudokuTableCellCandidate(row, col, innerRow, innerCol) {
+    static sudokuTableCellCandidate(row: number, col: number, innerRow: number, innerCol: number) {
         const div = document.createElement("div")
         div.id = Ids.cellCandidate(row, col, innerRow, innerCol)
         div.className = "sudoku-cell-candidate"
@@ -201,7 +225,7 @@ export class Elements {
         return div
     }
 
-    static sudokuTableCellContent(row, col) {
+    static sudokuTableCellContent(row: number, col: number) {
         const div = document.createElement("div")
         div.className = "sudoku-cell-content sudoku-cell-computed"
         div.id = Ids.cell(row, col)
@@ -217,7 +241,7 @@ export class Elements {
         return div
     }
 
-    static sudokuTableCell(row, col) {
+    static sudokuTableCell(row: number, col: number) {
         const td = document.createElement("td")
         td.className = "sudoku-cell"
         td.appendChild(this.sudokuTableCellContent(row, col))
@@ -243,7 +267,7 @@ export class Elements {
         return tr
     }
 
-    static sudokuTableRow(row) {
+    static sudokuTableRow(row: number) {
         const tr = document.createElement("tr")
         tr.className = "sudoku-row"
         for (let i = 0; i < Sudoku.sudokuSize; ++i) {

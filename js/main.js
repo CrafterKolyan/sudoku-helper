@@ -511,13 +511,17 @@
     }
   };
 
-  // src/elements.js
+  // src/elements.ts
   var Elements = class {
-    static _sudokuCellStyle;
-    static _sudokuCellSizePx = 60;
-    static _sudokuHiddenInput;
-    static _activeCellRow = void 0;
-    static _activeCellCol = void 0;
+    static {
+      this._sudokuCellSizePx = 60;
+    }
+    static {
+      this._activeCellRow = void 0;
+    }
+    static {
+      this._activeCellCol = void 0;
+    }
     static _sudokuStyleContent(sudokuCellSizePx) {
       let hDividerWidth;
       if (Sudoku.sudokuSize === 1) {
@@ -587,12 +591,20 @@
     }
     static _setActiveCell(row, col) {
       if (this._activeCellRow !== void 0 && this._activeCellCol !== void 0) {
-        document.getElementById(Ids.cell(this._activeCellRow, this._activeCellCol)).classList.remove("sudoku-cell-selected");
+        const cellDiv = document.getElementById(Ids.cell(this._activeCellRow, this._activeCellCol));
+        if (cellDiv === null) {
+          throw new ElementNotFound("cellDiv was not found");
+        }
+        cellDiv.classList.remove("sudoku-cell-selected");
       }
       this._activeCellRow = row;
       this._activeCellCol = col;
       if (row !== void 0 && col !== void 0) {
-        document.getElementById(Ids.cell(row, col)).classList.add("sudoku-cell-selected");
+        const cellDiv = document.getElementById(Ids.cell(row, col));
+        if (cellDiv === null) {
+          throw new ElementNotFound("cellDiv was not found");
+        }
+        cellDiv.classList.add("sudoku-cell-selected");
         this._sudokuHiddenInput.value = "0";
         this._sudokuHiddenInput.select();
         this._sudokuHiddenInput.focus();
@@ -608,9 +620,11 @@
         input.type = "number";
         input.addEventListener("input", () => {
           if (input.value === "") {
-            Sudoku.setCell(this._activeCellRow, this._activeCellCol, 0);
+            if (this._activeCellRow !== void 0 && this._activeCellCol !== void 0) {
+              Sudoku.setCell(this._activeCellRow, this._activeCellCol, 0);
+            }
           } else if (StringUtils.isNumeric(input.value)) {
-            if (parseInt(input.value) > 0 && parseInt(input.value) <= Sudoku.sudokuSize) {
+            if (parseInt(input.value) > 0 && parseInt(input.value) <= Sudoku.sudokuSize && this._activeCellRow !== void 0 && this._activeCellCol !== void 0) {
               Sudoku.setCell(this._activeCellRow, this._activeCellCol, parseInt(input.value));
             }
           }
@@ -647,29 +661,37 @@
             case "Esc":
             case "Escape":
               this._setActiveCell(void 0, void 0);
+              if (this._activeCellRow !== void 0 && this._activeCellCol !== void 0) {
+                Sudoku.setCell(this._activeCellRow, this._activeCellCol, 0);
+              }
+              break;
             case "Backspace":
-              Sudoku.setCell(this._activeCellRow, this._activeCellCol, 0);
+              if (this._activeCellRow !== void 0 && this._activeCellCol !== void 0) {
+                Sudoku.setCell(this._activeCellRow, this._activeCellCol, 0);
+              }
               break;
             case "Delete":
-              Sudoku.setCell(this._activeCellRow, this._activeCellCol, 0);
+              if (this._activeCellRow !== void 0 && this._activeCellCol !== void 0) {
+                Sudoku.setCell(this._activeCellRow, this._activeCellCol, 0);
+              }
               break;
             case "ArrowUp":
-              if (this._activeCellRow > 0) {
+              if (this._activeCellRow !== void 0 && this._activeCellRow > 0) {
                 this._setActiveCell(this._activeCellRow - 1, this._activeCellCol);
               }
               break;
             case "ArrowDown":
-              if (this._activeCellRow < Sudoku.sudokuSize - 1) {
+              if (this._activeCellRow !== void 0 && this._activeCellRow < Sudoku.sudokuSize - 1) {
                 this._setActiveCell(this._activeCellRow + 1, this._activeCellCol);
               }
               break;
             case "ArrowLeft":
-              if (this._activeCellCol > 0) {
+              if (this._activeCellCol !== void 0 && this._activeCellCol > 0) {
                 this._setActiveCell(this._activeCellRow, this._activeCellCol - 1);
               }
               break;
             case "ArrowRight":
-              if (this._activeCellCol < Sudoku.sudokuSize - 1) {
+              if (this._activeCellCol !== void 0 && this._activeCellCol < Sudoku.sudokuSize - 1) {
                 this._setActiveCell(this._activeCellRow, this._activeCellCol + 1);
               }
               break;
@@ -764,11 +786,14 @@
     }
   };
 
-  // src/main.js
+  // src/main.ts
   function addSudokuTable() {
     const main = document.getElementById("main");
     const sudokuTable = Elements.sudokuTable();
     const sudokuCellStyle = Elements.sudokuStyle();
+    if (main === null) {
+      throw new ElementNotFound("main is not found");
+    }
     main.appendChild(sudokuCellStyle);
     main.appendChild(sudokuTable);
     function recalculateSudokuCellSize() {

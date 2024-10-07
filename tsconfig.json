@@ -4,7 +4,7 @@
         "target": "ES6",
         "allowUnreachableCode": false,
         "allowUnusedLabels": false,
-        "allowJs": true,
+        "allowJs": false,
         "alwaysStrict": true,
         "noFallthroughCasesInSwitch": true,
         "noImplicitAny": true,
@@ -15,6 +15,6 @@
         "lib": ["es2018", "dom"]
     },
     "files": [
-        "src/main.js"
+        "src/main.ts"
     ]
 }
