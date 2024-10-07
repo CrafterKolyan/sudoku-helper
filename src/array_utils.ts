@@ -1,5 +1,5 @@
 export class ArrayUtils {
-    static argDuplicates(arr: any[]) {
+    static argDuplicates(arr: number[]) {
         const sortedArgArray = arr
             .map((v, i) => [v, i])
             .filter((v) => v[0] !== 0)
@@ -9,7 +9,7 @@ export class ArrayUtils {
         }
         let prevValue = sortedArgArray[0][0]
         let pushedPrevious = false
-        const duplicates: any[] = []
+        const duplicates: number[] = []
         for (let i = 1; i < sortedArgArray.length; ++i) {
             if (prevValue == sortedArgArray[i][0]) {
                 if (!pushedPrevious) {
@@ -30,7 +30,7 @@ export class ArrayUtils {
             return []
         }
         arr.sort((a, b) => a[0] - b[0] || a[1] - b[1])
-        const unique: any[] = []
+        const unique: [number, number][] = []
         let prev = arr[0]
         unique.push(prev)
         for (let i = 1; i < arr.length; ++i) {
@@ -42,7 +42,7 @@ export class ArrayUtils {
         return unique
     }
 
-    static subsets(arr: any[], k: number) {
+    static subsets<T>(arr: T[], k: number) {
         if (k === 0) {
             return [[]]
         } else if (arr.length === 0) {
@@ -52,7 +52,7 @@ export class ArrayUtils {
         } else if (arr.length < k) {
             return []
         }
-        const result: any[][] = []
+        const result: T[][] = []
         for (let i = 0; i < arr.length; ++i) {
             const first = arr[i]
             const rest = arr.slice(i + 1)
@@ -64,7 +64,7 @@ export class ArrayUtils {
         return result
     }
 
-    static allSubsets(arr: any[], minSize: number, maxSize: number) {
+    static allSubsets<T>(arr: T[], minSize: number, maxSize: number) {
         const result: any[][] = []
         for (let i = minSize; i <= maxSize; ++i) {
             result.push(...this.subsets(arr, i))
