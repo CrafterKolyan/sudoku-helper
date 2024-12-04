@@ -481,7 +481,11 @@
       let matrix = Matrix.fromString(str);
       if (matrix.length != this.sudokuSize) {
         throw new IncorrectSudokuSize(
-          "Got incorrect number of rows in sudoku. Expected: ".concat(this.sudokuSize.toString(), ". Actual: ", matrix.length.toString())
+          "Got incorrect number of rows in sudoku. Expected: ".concat(
+            this.sudokuSize.toString(),
+            ". Actual: ",
+            matrix.length.toString()
+          )
         );
       }
       this.load(matrix);
